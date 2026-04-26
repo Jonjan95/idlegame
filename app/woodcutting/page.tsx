@@ -13,26 +13,33 @@ interface Tree {
 }
 
 export default function WoodcuttingPage() {
-  // State-hantering
-  // Starta alltid med 0 (server och klient är överens)
   const [xp, setXp] = useState<number>(0);
   const [logs, setLogs] = useState<number>(0);
   const [isChopping, setIsChopping] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
 
-  // Efter att sidan laddats — hämta sparade värden
-useEffect(() => {
-  setXp(Number(localStorage.getItem('wc_xp')) || 0);
-  setLogs(Number(localStorage.getItem('wc_logs')) || 0);
-}, []); // [] betyder: kör bara en gång vid uppstart
+  // loaded är false tills vi läst klart från localStorage.
+  // useState (inte useRef) är viktigt här — state-värdet är "fruset" per render,
+  // så spara-effecterna ser loaded=false även om React kör dem två gånger (Strict Mode).
+  const [loaded, setLoaded] = useState(false);
 
-useEffect(() => {
-  localStorage.setItem('wc_xp', String(xp));
-}, [xp]);
+  // Ladda sparade värden och markera som klart
+  useEffect(() => {
+    setXp(Number(localStorage.getItem('wc_xp')) || 0);
+    setLogs(Number(localStorage.getItem('wc_logs')) || 0);
+    setLoaded(true);
+  }, []);
 
-useEffect(() => {
-  localStorage.setItem('wc_logs', String(logs));
-}, [logs]);
+  // Spara till localStorage — men bara efter att vi laddat klart
+  useEffect(() => {
+    if (!loaded) return;
+    localStorage.setItem('wc_xp', String(xp));
+  }, [xp, loaded]);
+
+  useEffect(() => {
+    if (!loaded) return;
+    localStorage.setItem('wc_logs', String(logs));
+  }, [logs, loaded]);
 
 
   // Definition av trädet vi hugger
