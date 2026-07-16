@@ -226,9 +226,10 @@ npm run test:e2e
 npm run build
 ```
 
-Some commands do not exist yet and will be added in the foundation milestone.
-Until then, contributors must run every available relevant command and report
-anything that could not be run.
+Vitest provides deterministic unit tests. Playwright currently provides a basic
+application and navigation smoke test; the critical playable-loop test will be
+added after that loop exists. GitHub Actions runs the validation suite for pull
+requests and pushes to `main`.
 
 ## Constraints
 

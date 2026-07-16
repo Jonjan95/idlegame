@@ -76,6 +76,7 @@ Install dependencies and start the development server:
 
 ```bash
 npm install
+npx playwright install chromium
 npm run dev
 ```
 
@@ -86,13 +87,20 @@ Vite prints the local development URL in the terminal.
 ```bash
 npm run dev
 npm run lint
+npm run type-check
+npm run test
+npm run test:watch
+npm run test:e2e
 npm run build
 npm run preview
 ```
 
-At the current baseline, `npm run build` performs TypeScript compilation and a
-production build. A separate type-check command, unit tests, browser tests, and
-continuous integration are planned in the foundation milestone.
+`npm run test` runs deterministic unit tests with Vitest. `npm run test:e2e`
+runs the current Playwright browser smoke test. The critical full gameplay flow
+will be added after the playable core exists.
+
+GitHub Actions runs lint, type-checking, unit tests, the production build, and
+the browser smoke test for pull requests and pushes to `main`.
 
 ## Routes
 

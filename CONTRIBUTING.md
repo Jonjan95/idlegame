@@ -72,19 +72,14 @@ Start development:
 npm run dev
 ```
 
-Current validation commands:
+Validation commands:
 
 ```bash
 npm run lint
-npm run build
-```
-
-The foundation milestone will add:
-
-```bash
 npm run type-check
 npm run test
 npm run test:e2e
+npm run build
 ```
 
 Run every relevant command available at the time of the issue. If a command
