@@ -1,19 +1,16 @@
 import Footer from "../components/Footer";
 import { useGame } from "../context/GameContext";
-import { xpToLevel } from "../lib/xp";
-import { TREES, SHOP_TOOLS, Resource, Tools } from "../lib/resources";
-
-function lockReason(resource: Resource, tools: Tools): string | null {
-  if (resource.toolReq && !tools[resource.toolReq]) {
-    const tool = SHOP_TOOLS.find((t) => t.id === resource.toolReq);
-    return `Requires ${tool?.name}`;
-  }
-  return null;
-}
+import { xpToLevel, levelProgressPercent } from "../lib/xp";
+import { TREES } from "../lib/resources";
+import {
+  describeResourceLock,
+  getResourceLock,
+} from "../game/progression";
 
 export default function Woodcutting() {
   const { state, selectedTree, selectResource, loaded } = useGame();
   const level = xpToLevel(state.wcXp);
+  const pct = levelProgressPercent(state.wcXp);
   const currentResource = TREES.find((t) => t.id === selectedTree) ?? TREES[0];
 
   if (!loaded) {
@@ -36,6 +33,12 @@ export default function Woodcutting() {
             Level {level} &mdash; {state.inventory[currentResource.id] || 0}{" "}
             {currentResource.name.toLowerCase()} (Total: {state.wcLogs})
           </p>
+          <div className="mt-2 h-1.5 w-full rounded-full bg-zinc-800">
+            <div
+              className="h-1.5 rounded-full bg-green-500 transition-all duration-300"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
         </header>
 
         <section className="mb-6">
@@ -44,8 +47,9 @@ export default function Woodcutting() {
           </h2>
           <div className="grid grid-cols-3 gap-px bg-zinc-700">
             {TREES.map((tree) => {
-              const reason = lockReason(tree, state.tools);
-              const unlocked = reason === null;
+              const lock = getResourceLock(tree, state.tools, level);
+              const reason = describeResourceLock(lock);
+              const unlocked = lock === null;
               const isSelected = selectedTree === tree.id;
               return (
                 <button
