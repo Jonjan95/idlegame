@@ -51,6 +51,31 @@ React presentation concerns.
 Economy values are partly centralized, but timing rules and several mutations
 remain embedded in `GameContext`.
 
+### Canonical game state
+
+`src/game/state.ts` defines the React-independent state model used by
+`GameContext`:
+
+- `wcXp` and `miningXp` are cumulative lifetime XP.
+- `wcLogs` and `miningOres` are cumulative lifetime production totals. They are
+  not spendable balances.
+- `inventory` contains spendable item quantities keyed by stable item IDs.
+- `gold` is a spendable balance.
+- `tools` records current prototype ownership flags.
+- Resource selections store stable resource IDs for each activity.
+- Active-activity metadata records the skill, resource ID, and start timestamp.
+
+The module also defines:
+
+- Default-state factories that clone mutable nested values.
+- Deterministic validation issues for numeric and identifier invariants.
+- A versioned `GameSave` envelope that can represent all current persistent
+  values without relying on React or browser APIs.
+
+The save envelope is a target boundary only. The current storage adapter still
+uses legacy individual `localStorage` keys; migration to the envelope belongs to
+the later persistence issue.
+
 ### Pages
 
 Pages read state through `useGame`. Woodcutting and Mining currently duplicate
