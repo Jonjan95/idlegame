@@ -1,0 +1,146 @@
+# Game Design
+
+## Document purpose
+
+This document records what is known, what is currently being tested, and what
+remains deliberately undecided. It is not a promise of a complete feature set.
+
+Gameplay changes should update this document when they change a committed
+principle, the active design hypothesis, or the rules of the playable milestone.
+
+## Product direction
+
+IdleGame is intended to become a progression-focused incremental RPG. The player
+should repeatedly make progress, feel meaningful improvements, unlock limited
+automation, and see their capabilities grow over time.
+
+The final theme, story, setting, character structure, and long-term progression
+model are not yet decided.
+
+## Committed design principles
+
+These principles are stable enough to guide foundation work:
+
+1. **A clear central interaction.** The player should quickly understand the
+   main action that creates progress.
+2. **Visible cause and effect.** Actions, rewards, upgrades, and production
+   changes should be observable.
+3. **Meaningful progression.** Improvements should change what the player can
+   do or how effectively they can do it.
+4. **Earned automation.** The initial interaction should not disappear
+   immediately, and automatic progress should be unlocked deliberately.
+5. **Gradual complexity.** New systems should be introduced only after the
+   player understands the current loop.
+6. **Interconnected systems later.** Systems may eventually reinforce one
+   another, but only after the core loop proves worthwhile.
+7. **Human playtesting matters.** Automated tests verify rules; they do not
+   establish that the game is understandable, satisfying, or fun.
+
+## Current prototype
+
+The repository currently models two gathering skills:
+
+- Woodcutting produces trees and logs.
+- Mining produces rocks and ores.
+- Both activities grant XP and levels.
+- Resources can be sold for gold.
+- Tools can be purchased to unlock additional resources.
+- One activity can remain active and generate offline progress.
+
+This content is prototype scaffolding. It demonstrates several technical needs,
+but it is not a final theme decision.
+
+## Active design hypothesis
+
+The first playable milestone will test whether this structure produces a clear
+sense of progression:
+
+```text
+Perform a meaningful action
+→ gain a primary resource or progress
+→ purchase one upgrade
+→ experience improved production
+→ unlock basic automation
+→ observe continued visible progress
+```
+
+Only one coherent path is required. Existing secondary prototype content should
+be preserved unless removing or changing it is explicitly within an issue.
+
+The milestone should use provisional or theme-neutral terminology internally so
+the experiment can be reskinned or replaced without rewriting the game engine.
+
+## Milestone design constraints
+
+The **IdleGame Foundation & Playable Core** milestone should contain no more
+than:
+
+- One primary interaction.
+- One primary resource or progress measure.
+- One clearly noticeable production upgrade.
+- One basic automation unlock.
+- One visible progression path needed to support that loop.
+
+Economy and progression values must be centralized. The exact values remain
+provisional until manual playtesting.
+
+## Existing behavior worth preserving
+
+The following prototype behaviors are useful unless an issue intentionally
+revises them:
+
+- A single active activity.
+- Skill XP and visible level progress.
+- Visible action progress.
+- Inventory and resource counts.
+- Purchases and unlock requirements.
+- Notifications for earned resources.
+- Local persistence.
+- A summary when offline progress is awarded.
+
+Preserving a behavior does not require keeping its current implementation.
+
+## Unresolved design questions
+
+These questions are intentionally open:
+
+- What is the central player fantasy?
+- Is the main interaction training, exploration, crafting, combat preparation,
+  discovery, building, or something else?
+- Does the game need traditional inventory items?
+- Is currency necessary for the first long-term design?
+- How should RPG identity be expressed: attributes, equipment, skills,
+  locations, choices, or another structure?
+- What should remain engaging after automation is unlocked?
+- Which systems should eventually become interconnected?
+- What pacing makes an upgrade feel earned without becoming tedious?
+
+These are design questions, not backlog commitments.
+
+## Evaluating new ideas
+
+New mechanics should begin as small hypotheses:
+
+1. State the intended player feeling.
+2. Define the smallest loop that could create it.
+3. Identify what existing rule it changes or depends on.
+4. Implement only enough to test the hypothesis.
+5. Add deterministic tests for the rules.
+6. Perform the issue's manual playtest.
+7. Record the result before expanding the idea.
+
+Ideas should not be added merely because they are common in incremental games.
+
+## Explicitly outside the first milestone
+
+- Prestige or resets as progression.
+- Multiple currencies.
+- Large skill or upgrade trees.
+- Combat systems.
+- Story campaigns.
+- Multiplayer.
+- Monetization.
+- Backend accounts.
+- Mobile release work.
+- Migration to another engine.
+- A major visual redesign.
