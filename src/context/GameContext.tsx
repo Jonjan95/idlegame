@@ -6,6 +6,12 @@ import {
   type GameState,
   type SkillName,
 } from "../game/state";
+import {
+  awardResource,
+  grantGold,
+  purchaseTool,
+  sellInventoryItem,
+} from "../game/economy";
 
 export type { GameState, SkillName } from "../game/state";
 
@@ -36,7 +42,6 @@ interface GameContextValue {
   stopSkill: () => void;
   selectResource: (skill: SkillName, resourceId: string) => void;
   buyTool: (toolId: ToolKey) => void;
-  sell: (item: "wcLogs" | "miningOres", amount: number, goldPer: number) => void;
   sellItem: (itemId: string, amount: number, goldPer: number) => void;
   addGold: (amount: number) => void;
 }
@@ -100,20 +105,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const skill = localStorage.getItem("active_skill") as SkillName | null;
     const startTime = Number(localStorage.getItem("active_skill_start")) || 0;
-    const final = { ...saved };
+    let final = saved;
 
     if (skill && startTime > 0) {
       const resourceId = skill === "woodcutting" ? storedTree : storedRock;
       const resource = getResource(skill, resourceId);
       const elapsed = (Date.now() - startTime) / 1000;
       const items = Math.floor(elapsed / secsPerItem(resource));
-      const xp = items * resource.xpPerItem;
-
-      if (skill === "woodcutting") { final.wcXp += xp; final.wcLogs += items; }
-      else { final.miningXp += xp; final.miningOres += items; }
-
-      final.inventory = { ...final.inventory };
-      final.inventory[resourceId] = (final.inventory[resourceId] || 0) + items;
+      final = awardResource(saved, {
+        skill,
+        resourceId,
+        quantity: items,
+        xpPerItem: resource.xpPerItem,
+      });
 
       writeToStorage(final);
       localStorage.setItem("active_skill_start", String(Date.now()));
@@ -147,13 +151,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
       setProgress((prev) => {
         const next = prev + speed;
         if (next >= 100) {
-          setState((s) => {
-            const newState = { ...s, inventory: { ...s.inventory } };
-            newState.inventory[resourceId] = (newState.inventory[resourceId] || 0) + 1;
-            if (activeSkill === "woodcutting") { newState.wcXp += xpPerItem; newState.wcLogs += 1; }
-            else { newState.miningXp += xpPerItem; newState.miningOres += 1; }
-            return newState;
-          });
+          setState((s) =>
+            awardResource(s, {
+              skill: activeSkill,
+              resourceId,
+              quantity: 1,
+              xpPerItem,
+            })
+          );
           pushToast(itemIcon, `+1 ${resource.name}`);
           return 0;
         }
@@ -198,40 +203,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
   function buyTool(toolId: ToolKey) {
     const tool = SHOP_TOOLS.find((t) => t.id === toolId);
     if (!tool) return;
-    setState((s) => {
-      if (s.gold < tool.cost || s.tools[toolId]) return s;
-      return { ...s, gold: s.gold - tool.cost, tools: { ...s.tools, [toolId]: true } };
-    });
-  }
-
-  function sell(item: "wcLogs" | "miningOres", amount: number, goldPer: number) {
-    setState((s) => {
-      const qty = Math.min(s[item], amount);
-      return { ...s, [item]: s[item] - qty, gold: s.gold + qty * goldPer };
-    });
+    setState((s) => purchaseTool(s, tool));
   }
 
   function sellItem(itemId: string, amount: number, goldPer: number) {
-    setState((s) => {
-      const currentQty = s.inventory[itemId] || 0;
-      if (currentQty <= 0) return s;
-      const qty = Math.min(currentQty, amount);
-      return {
-        ...s,
-        inventory: { ...s.inventory, [itemId]: currentQty - qty },
-        gold: s.gold + qty * goldPer,
-      };
-    });
+    setState((s) => sellInventoryItem(s, itemId, amount, goldPer));
   }
 
   function addGold(amount: number) {
-    setState((s) => ({ ...s, gold: s.gold + amount }));
+    setState((s) => grantGold(s, amount));
   }
 
   return (
     <GameContext.Provider value={{
       state, activeSkill, progress, selectedTree, selectedRock, toasts, loaded,
-      startSkill, stopSkill, selectResource, buyTool, sell, sellItem, addGold,
+      startSkill, stopSkill, selectResource, buyTool, sellItem, addGold,
     }}>
       {children}
     </GameContext.Provider>
