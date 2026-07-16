@@ -1,19 +1,123 @@
-# Idle Game
+# IdleGame
 
-A browser-based idle game built with React, TypeScript, and Vite.
+IdleGame is an early browser-based incremental RPG prototype built with React,
+TypeScript, Vite, Tailwind CSS, and React Router.
 
-> **Work in progress** — features and gameplay are actively being developed.
+The project is in a foundation and experimentation phase. Its final theme,
+setting, and long-term game structure have not been decided. The current
+woodcutting, mining, inventory, and shop systems are prototype scaffolding used
+to explore progression, resource generation, upgrades, automation, persistence,
+and visual feedback. They are not a commitment to a gathering-focused final
+game.
 
-## Tech Stack
+## Current prototype
 
-- React + TypeScript
+The application currently includes:
+
+- Woodcutting and mining activities.
+- Timed resource generation.
+- Skill XP, levels, and level-progress displays.
+- An inventory of gathered resources.
+- Selling resources for gold.
+- Tool purchases that unlock additional resources.
+- Local browser saves.
+- Basic offline resource generation.
+- Notifications and visible action progress.
+
+The current implementation has known foundation issues, especially around
+offline-progress accounting, save validation, domain logic living in React, and
+missing automated validation. See [ARCHITECTURE.md](./ARCHITECTURE.md) and
+[ROADMAP.md](./ROADMAP.md).
+
+## Current direction
+
+The working goal is a progression-focused incremental RPG with:
+
+- A strong, understandable central interaction.
+- Visible progress and satisfying rewards.
+- Meaningful upgrades.
+- Basic automation that is earned rather than available immediately.
+- Gradual unlocking and room for interconnected systems later.
+
+The first milestone, **IdleGame Foundation & Playable Core**, will prove only a
+small loop:
+
+```text
+Perform a meaningful action
+→ gain a primary resource or progress
+→ buy one production upgrade
+→ observe a noticeable improvement
+→ unlock basic automation
+→ observe continued progress
+```
+
+The milestone will not decide the final theme or introduce large speculative
+systems.
+
+## Technology
+
+- React 19
+- TypeScript
 - Vite
 - Tailwind CSS
 - React Router
 
-## Getting Started
+The technology stack should remain in place unless a separate approved issue
+explicitly changes it.
+
+## Getting started
+
+Requirements:
+
+- A current Node.js LTS release.
+- npm.
+
+Install dependencies and start the development server:
 
 ```bash
 npm install
 npm run dev
 ```
+
+Vite prints the local development URL in the terminal.
+
+## Available commands
+
+```bash
+npm run dev
+npm run lint
+npm run build
+npm run preview
+```
+
+At the current baseline, `npm run build` performs TypeScript compilation and a
+production build. A separate type-check command, unit tests, browser tests, and
+continuous integration are planned in the foundation milestone.
+
+## Routes
+
+| Route | Current purpose |
+| --- | --- |
+| `/` | Skill dashboard and activity controls |
+| `/woodcutting` | Woodcutting resource selection |
+| `/mining` | Mining resource selection |
+| `/inventory` | Gathered resource inventory |
+| `/shop` | Resource sales and tool purchases |
+
+## Project documentation
+
+- [GAME_DESIGN.md](./GAME_DESIGN.md): design principles, current hypotheses,
+  and unresolved questions.
+- [ARCHITECTURE.md](./ARCHITECTURE.md): current implementation, risks, and
+  intended domain boundaries.
+- [ROADMAP.md](./ROADMAP.md): the controlled foundation milestone and issue
+  sequence.
+- [CONTRIBUTING.md](./CONTRIBUTING.md): issue, branch, validation, and pull
+  request workflow.
+- [AGENTS.md](./AGENTS.md): repository rules for coding agents.
+
+## Project status
+
+This is a work in progress and is not yet a balanced or release-ready game.
+Automated tests can establish correctness, but decisions about clarity, pacing,
+and enjoyment must be based on manual playtesting.
