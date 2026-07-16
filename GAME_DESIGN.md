@@ -45,6 +45,7 @@ The repository currently models two gathering skills:
 - Both activities grant XP and levels.
 - Resources can be sold for gold.
 - Tools can be purchased to unlock additional resources.
+- Later prototype resources can require both a skill level and an owned tool.
 - One activity can remain active and generate offline progress.
 
 This content is prototype scaffolding. It demonstrates several technical needs,

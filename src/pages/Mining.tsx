@@ -1,19 +1,16 @@
 import Footer from "../components/Footer";
 import { useGame } from "../context/GameContext";
-import { xpToLevel } from "../lib/xp";
-import { ROCKS, SHOP_TOOLS, Resource, Tools } from "../lib/resources";
-
-function lockReason(resource: Resource, tools: Tools): string | null {
-  if (resource.toolReq && !tools[resource.toolReq]) {
-    const tool = SHOP_TOOLS.find((t) => t.id === resource.toolReq);
-    return `Requires ${tool?.name}`;
-  }
-  return null;
-}
+import { xpToLevel, levelProgressPercent } from "../lib/xp";
+import { ROCKS } from "../lib/resources";
+import {
+  describeResourceLock,
+  getResourceLock,
+} from "../game/progression";
 
 export default function Mining() {
   const { state, selectedRock, selectResource, loaded } = useGame();
   const level = xpToLevel(state.miningXp);
+  const pct = levelProgressPercent(state.miningXp);
   const currentResource = ROCKS.find((r) => r.id === selectedRock) ?? ROCKS[0];
 
   if (!loaded) {
@@ -36,6 +33,12 @@ export default function Mining() {
             Level {level} &mdash; {state.inventory[currentResource.id] || 0}{" "}
             {currentResource.name.toLowerCase()} (Total: {state.miningOres})
           </p>
+          <div className="mt-2 h-1.5 w-full rounded-full bg-zinc-800">
+            <div
+              className="h-1.5 rounded-full bg-amber-500 transition-all duration-300"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
         </header>
 
         <section className="mb-6">
@@ -44,8 +47,9 @@ export default function Mining() {
           </h2>
           <div className="grid grid-cols-3 gap-px bg-zinc-700">
             {ROCKS.map((rock) => {
-              const reason = lockReason(rock, state.tools);
-              const unlocked = reason === null;
+              const lock = getResourceLock(rock, state.tools, level);
+              const reason = describeResourceLock(lock);
+              const unlocked = lock === null;
               const isSelected = selectedRock === rock.id;
               return (
                 <button

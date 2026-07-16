@@ -24,21 +24,22 @@ export interface Resource {
   icon: string;
   xpPerItem: number;
   speed: number;
+  levelReq: number;
   toolReq: ToolKey | null;
   itemKey: ItemKey;
   goldPer: number;
 }
 
 export const TREES: Resource[] = [
-  { id: "tree",   name: "Tree",   icon: "🌲", xpPerItem: 25,  speed: 2,   toolReq: null,         itemKey: "wcLogs",         goldPer: 2  },
-  { id: "oak",    name: "Oak",    icon: "🌳", xpPerItem: 60,  speed: 1.5, toolReq: "bronzeAxe",  itemKey: "wcOakLogs",      goldPer: 8  },
-  { id: "willow", name: "Willow", icon: "🌿", xpPerItem: 110, speed: 1,   toolReq: "ironAxe",    itemKey: "wcWillowLogs",   goldPer: 18 },
+  { id: "tree",   name: "Tree",   icon: "🌲", xpPerItem: 25,  speed: 2,   levelReq: 1,  toolReq: null,         itemKey: "wcLogs",         goldPer: 2  },
+  { id: "oak",    name: "Oak",    icon: "🌳", xpPerItem: 60,  speed: 1.5, levelReq: 15, toolReq: "bronzeAxe",  itemKey: "wcOakLogs",      goldPer: 8  },
+  { id: "willow", name: "Willow", icon: "🌿", xpPerItem: 110, speed: 1,   levelReq: 30, toolReq: "ironAxe",    itemKey: "wcWillowLogs",   goldPer: 18 },
 ];
 
 export const ROCKS: Resource[] = [
-  { id: "rock",   name: "Rock",   icon: "🪨", xpPerItem: 35,  speed: 1.5, toolReq: null,             itemKey: "miningOres",       goldPer: 5  },
-  { id: "copper", name: "Copper", icon: "🟤", xpPerItem: 70,  speed: 1.2, toolReq: "bronzePickaxe",  itemKey: "miningCopperOres", goldPer: 15 },
-  { id: "iron",   name: "Iron",   icon: "⚙️",  xpPerItem: 130, speed: 0.8, toolReq: "ironPickaxe",    itemKey: "miningIronOres",   goldPer: 30 },
+  { id: "rock",   name: "Rock",   icon: "🪨", xpPerItem: 35,  speed: 1.5, levelReq: 1,  toolReq: null,             itemKey: "miningOres",       goldPer: 5  },
+  { id: "copper", name: "Copper", icon: "🟤", xpPerItem: 70,  speed: 1.2, levelReq: 10, toolReq: "bronzePickaxe",  itemKey: "miningCopperOres", goldPer: 15 },
+  { id: "iron",   name: "Iron",   icon: "⚙️",  xpPerItem: 130, speed: 0.8, levelReq: 25, toolReq: "ironPickaxe",    itemKey: "miningIronOres",   goldPer: 30 },
 ];
 
 export interface ShopTool {

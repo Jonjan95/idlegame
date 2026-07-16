@@ -16,6 +16,7 @@ describe("resource configuration", () => {
     for (const resource of RESOURCES) {
       expect(resource.xpPerItem).toBeGreaterThan(0);
       expect(resource.speed).toBeGreaterThan(0);
+      expect(resource.levelReq).toBeGreaterThanOrEqual(1);
       expect(resource.goldPer).toBeGreaterThan(0);
     }
 

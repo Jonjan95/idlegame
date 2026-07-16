@@ -94,11 +94,24 @@ mutations to the domain module.
 Resource unlock rules, elapsed-time production, and offline timing remain
 outside this module and are handled by separate milestone issues.
 
+### Progression domain
+
+`src/game/progression.ts` evaluates the current prototype's centralized resource
+requirements without importing React:
+
+- Level requirements are checked before tool requirements.
+- Results are structured as level locks, tool locks, or unlocked.
+- A shared description helper converts those results into the current UI text.
+
+Woodcutting and Mining consume the same rule instead of declaring duplicate
+component-level lock functions. The current resource names and requirements
+remain provisional scaffolding and can be replaced without changing the rule's
+shape.
+
 ### Pages
 
-Pages read state through `useGame`. Woodcutting and Mining currently duplicate
-resource-lock calculations. These rules are enforced primarily through disabled
-buttons rather than domain commands.
+Pages read state through `useGame`, render the structured domain result, and
+disable resource-selection buttons while a level or tool lock is present.
 
 ## Persistence today
 
