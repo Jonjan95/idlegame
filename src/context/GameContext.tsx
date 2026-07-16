@@ -1,7 +1,13 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { TREES, ROCKS, SHOP_TOOLS, Tools, ToolKey, DEFAULT_TOOLS, Resource } from "../lib/resources";
+import { TREES, ROCKS, SHOP_TOOLS, ToolKey, Resource } from "../lib/resources";
+import {
+  createDefaultGameState,
+  createDefaultResourceSelections,
+  type GameState,
+  type SkillName,
+} from "../game/state";
 
-export type SkillName = "woodcutting" | "mining";
+export type { GameState, SkillName } from "../game/state";
 
 function getResource(skill: SkillName, selectedId: string): Resource {
   const list = skill === "woodcutting" ? TREES : ROCKS;
@@ -10,16 +16,6 @@ function getResource(skill: SkillName, selectedId: string): Resource {
 
 function secsPerItem(resource: Resource): number {
   return (100 / resource.speed) * 0.05;
-}
-
-export interface GameState {
-  wcXp: number;
-  wcLogs: number;
-  miningXp: number;
-  miningOres: number;
-  gold: number;
-  tools: Tools;
-  inventory: Record<string, number>;
 }
 
 export interface Toast {
@@ -54,13 +50,15 @@ export function useGame(): GameContextValue {
 }
 
 function readFromStorage(): GameState {
+  const defaults = createDefaultGameState();
+
   return {
     wcXp: Number(localStorage.getItem("wc_xp")) || 0,
     wcLogs: Number(localStorage.getItem("wc_logs")) || 0,
     miningXp: Number(localStorage.getItem("mining_xp")) || 0,
     miningOres: Number(localStorage.getItem("mining_ores")) || 0,
     gold: Number(localStorage.getItem("gold")) || 0,
-    tools: JSON.parse(localStorage.getItem("tools") || "null") ?? DEFAULT_TOOLS,
+    tools: JSON.parse(localStorage.getItem("tools") || "null") ?? defaults.tools,
     inventory: JSON.parse(localStorage.getItem("inventory") || "{}"),
   };
 }
@@ -78,20 +76,25 @@ function writeToStorage(s: GameState): void {
 let nextToastId = 0;
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<GameState>({
-    wcXp: 0, wcLogs: 0, miningXp: 0, miningOres: 0, gold: 0, tools: DEFAULT_TOOLS, inventory: {},
-  });
+  const [state, setState] = useState<GameState>(createDefaultGameState);
   const [activeSkill, setActiveSkill] = useState<SkillName | null>(null);
   const [progress, setProgress] = useState(0);
-  const [selectedTree, setSelectedTree] = useState("tree");
-  const [selectedRock, setSelectedRock] = useState("rock");
+  const [selectedTree, setSelectedTree] = useState(
+    () => createDefaultResourceSelections().woodcutting
+  );
+  const [selectedRock, setSelectedRock] = useState(
+    () => createDefaultResourceSelections().mining
+  );
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const saved = readFromStorage();
-    const storedTree = localStorage.getItem("selected_tree") || "tree";
-    const storedRock = localStorage.getItem("selected_rock") || "rock";
+    const selections = createDefaultResourceSelections();
+    const storedTree =
+      localStorage.getItem("selected_tree") || selections.woodcutting;
+    const storedRock =
+      localStorage.getItem("selected_rock") || selections.mining;
     setSelectedTree(storedTree);
     setSelectedRock(storedRock);
 
