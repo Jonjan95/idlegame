@@ -97,7 +97,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const skill = localStorage.getItem("active_skill") as SkillName | null;
     const startTime = Number(localStorage.getItem("active_skill_start")) || 0;
-    let final = { ...saved };
+    const final = { ...saved };
 
     if (skill && startTime > 0) {
       const resourceId = skill === "woodcutting" ? storedTree : storedRock;
