@@ -76,6 +76,24 @@ The save envelope is a target boundary only. The current storage adapter still
 uses legacy individual `localStorage` keys; migration to the envelope belongs to
 the later persistence issue.
 
+### Economy domain
+
+`src/game/economy.ts` contains deterministic, immutable state transitions for:
+
+- Awarding one or more resources with their associated XP and lifetime
+  production totals.
+- Purchasing currently configured tools.
+- Selling spendable inventory quantities for gold.
+- Applying the existing positive debug gold grant.
+
+The functions reject invalid quantities, prices, costs, identifiers, and unsafe
+integer results without changing the input state. `GameContext` coordinates the
+React state update and persistence side effects but delegates these economy
+mutations to the domain module.
+
+Resource unlock rules, elapsed-time production, and offline timing remain
+outside this module and are handled by separate milestone issues.
+
 ### Pages
 
 Pages read state through `useGame`. Woodcutting and Mining currently duplicate
