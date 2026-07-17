@@ -112,6 +112,10 @@ Any issue that changes persisted state must document:
 Deleting or resetting existing player progress is not an acceptable implicit
 migration.
 
+The current canonical browser key is `idlegame.save`. Persistence tests should
+use the `StorageLike` adapter instead of browser globals. Legacy fixtures must
+prove both value preservation and canonical precedence after migration.
+
 ## Testing
 
 Unit tests should focus primarily on deterministic domain behavior:

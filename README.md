@@ -24,13 +24,13 @@ The application currently includes:
 - An inventory of gathered resources.
 - Selling resources for gold.
 - Tool purchases that unlock additional resources.
-- Local browser saves.
+- Versioned, validated local browser saves with legacy-key migration.
 - Basic offline resource generation.
 - Notifications and visible action progress.
 
-The current implementation has known foundation issues, especially around
-offline-progress accounting, save validation, domain logic living in React, and
-missing automated validation. See [ARCHITECTURE.md](./ARCHITECTURE.md) and
+The remaining foundation risks are primarily bounded offline progress,
+multi-tab coordination, and completing the combined playable-loop test and
+manual evaluation. See [ARCHITECTURE.md](./ARCHITECTURE.md) and
 [ROADMAP.md](./ROADMAP.md).
 
 ## Current direction

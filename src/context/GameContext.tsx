@@ -8,6 +8,7 @@ import {
 } from "react";
 import { TREES, ROCKS, SHOP_TOOLS, ToolKey, Resource } from "../lib/resources";
 import {
+  CURRENT_SAVE_VERSION,
   createDefaultGameState,
   createDefaultResourceSelections,
   type GameState,
@@ -31,6 +32,11 @@ import {
   purchaseRefinedTechnique,
   purchaseSteadyRoutine,
 } from "../game/playableCore";
+import {
+  clearGameStorage,
+  loadGameSave,
+  saveGameSave,
+} from "../persistence/gameStorage";
 
 export type { GameState, SkillName } from "../game/state";
 
@@ -62,6 +68,7 @@ interface GameContextValue {
   practice: () => void;
   buyRefinedTechnique: () => void;
   buySteadyRoutine: () => void;
+  resetGame: () => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -70,67 +77,6 @@ export function useGame(): GameContextValue {
   const ctx = useContext(GameContext);
   if (!ctx) throw new Error("useGame must be used inside GameProvider");
   return ctx;
-}
-
-function readFromStorage(): GameState {
-  const defaults = createDefaultGameState();
-
-  return {
-    wcXp: Number(localStorage.getItem("wc_xp")) || 0,
-    wcLogs: Number(localStorage.getItem("wc_logs")) || 0,
-    miningXp: Number(localStorage.getItem("mining_xp")) || 0,
-    miningOres: Number(localStorage.getItem("mining_ores")) || 0,
-    gold: Number(localStorage.getItem("gold")) || 0,
-    tools: JSON.parse(localStorage.getItem("tools") || "null") ?? defaults.tools,
-    inventory: JSON.parse(localStorage.getItem("inventory") || "{}"),
-    playableCore: {
-      mastery: Number(localStorage.getItem("playable_core_mastery")) || 0,
-      trainingXp:
-        Number(localStorage.getItem("playable_core_training_xp")) || 0,
-      completedCycles:
-        Number(localStorage.getItem("playable_core_completed_cycles")) || 0,
-      cycleProgress:
-        Number(localStorage.getItem("playable_core_cycle_progress")) || 0,
-      refinedTechniqueOwned:
-        localStorage.getItem("playable_core_refined_technique") === "true",
-      steadyRoutineOwned:
-        localStorage.getItem("playable_core_steady_routine") === "true",
-    },
-  };
-}
-
-function writeToStorage(s: GameState): void {
-  localStorage.setItem("wc_xp", String(s.wcXp));
-  localStorage.setItem("wc_logs", String(s.wcLogs));
-  localStorage.setItem("mining_xp", String(s.miningXp));
-  localStorage.setItem("mining_ores", String(s.miningOres));
-  localStorage.setItem("gold", String(s.gold));
-  localStorage.setItem("tools", JSON.stringify(s.tools));
-  localStorage.setItem("inventory", JSON.stringify(s.inventory));
-  localStorage.setItem(
-    "playable_core_mastery",
-    String(s.playableCore.mastery)
-  );
-  localStorage.setItem(
-    "playable_core_training_xp",
-    String(s.playableCore.trainingXp)
-  );
-  localStorage.setItem(
-    "playable_core_completed_cycles",
-    String(s.playableCore.completedCycles)
-  );
-  localStorage.setItem(
-    "playable_core_cycle_progress",
-    String(s.playableCore.cycleProgress)
-  );
-  localStorage.setItem(
-    "playable_core_refined_technique",
-    String(s.playableCore.refinedTechniqueOwned)
-  );
-  localStorage.setItem(
-    "playable_core_steady_routine",
-    String(s.playableCore.steadyRoutineOwned)
-  );
 }
 
 let nextToastId = 0;
@@ -142,6 +88,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const observedTechniqueOwned = useRef(false);
   const observedRoutineOwned = useRef(false);
   const lastCoreTickAt = useRef<number | null>(null);
+  const activeActivityStartedAt = useRef<number | null>(null);
   const [state, setState] = useState<GameState>(createDefaultGameState);
   const [activeSkill, setActiveSkill] = useState<SkillName | null>(null);
   const [progress, setProgress] = useState(0);
@@ -155,21 +102,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    const saved = readFromStorage();
-    const selections = createDefaultResourceSelections();
-    const storedTree =
-      localStorage.getItem("selected_tree") || selections.woodcutting;
-    const storedRock =
-      localStorage.getItem("selected_rock") || selections.mining;
+    const loadedSave = loadGameSave(localStorage).save;
+    const saved = loadedSave.state;
+    let storedTree = loadedSave.selections.woodcutting;
+    let storedRock = loadedSave.selections.mining;
+    const activity = loadedSave.activeActivity;
+    if (activity?.skill === "woodcutting") {
+      storedTree = activity.resourceId;
+    } else if (activity?.skill === "mining") {
+      storedRock = activity.resourceId;
+    }
     setSelectedTree(storedTree);
     setSelectedRock(storedRock);
 
-    const skill = localStorage.getItem("active_skill") as SkillName | null;
-    const startTime = Number(localStorage.getItem("active_skill_start")) || 0;
+    const skill = activity?.skill ?? null;
+    const startTime = activity?.startedAt ?? 0;
     let final = saved;
 
     if (skill && startTime > 0) {
-      const resourceId = skill === "woodcutting" ? storedTree : storedRock;
+      const resourceId = activity?.resourceId ??
+        (skill === "woodcutting" ? storedTree : storedRock);
       const resource = getResource(skill, resourceId);
       const now = Date.now();
       const production = calculateElapsedProduction(
@@ -183,15 +135,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
         xpPerItem: resource.xpPerItem,
       });
 
-      writeToStorage(final);
       const remainingElapsedMs = progressToElapsedMs(
         resource.speed,
         production.progress
       );
-      localStorage.setItem(
-        "active_skill_start",
-        String(now - remainingElapsedMs)
-      );
+      activeActivityStartedAt.current = now - remainingElapsedMs;
       setActiveSkill(skill);
       setProgress(production.progress);
       progressRef.current = production.progress;
@@ -214,8 +162,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!loaded) return;
-    writeToStorage(state);
-  }, [state, loaded]);
+
+    const resourceId = activeSkill
+      ? activeSkill === "woodcutting"
+        ? selectedTree
+        : selectedRock
+      : null;
+    const startedAt = activeActivityStartedAt.current;
+
+    saveGameSave(localStorage, {
+      version: CURRENT_SAVE_VERSION,
+      state,
+      selections: {
+        woodcutting: selectedTree,
+        mining: selectedRock,
+      },
+      activeActivity:
+        activeSkill && resourceId && startedAt
+          ? { skill: activeSkill, resourceId, startedAt }
+          : null,
+    });
+  }, [state, loaded, activeSkill, selectedTree, selectedRock]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -322,10 +289,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           speed,
           production.progress
         );
-        localStorage.setItem(
-          "active_skill_start",
-          String(now - remainingElapsedMs)
-        );
+        activeActivityStartedAt.current = now - remainingElapsedMs;
         pushToast(
           itemIcon,
           `+${production.completedItems} ${resource.name}`
@@ -348,9 +312,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   function startSkill(skill: SkillName) {
     setProgress(0);
     progressRef.current = 0;
+    activeActivityStartedAt.current = Date.now();
     setActiveSkill(skill);
-    localStorage.setItem("active_skill", skill);
-    localStorage.setItem("active_skill_start", String(Date.now()));
   }
 
   function stopSkill() {
@@ -358,8 +321,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     progressRef.current = 0;
     setActiveSkill(null);
     lastTickAt.current = null;
-    localStorage.removeItem("active_skill");
-    localStorage.removeItem("active_skill_start");
+    activeActivityStartedAt.current = null;
   }
 
   function selectResource(skill: SkillName, resourceId: string) {
@@ -368,14 +330,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (activeSkill === skill) {
       const now = Date.now();
       lastTickAt.current = now;
-      localStorage.setItem("active_skill_start", String(now));
+      activeActivityStartedAt.current = now;
     }
     if (skill === "woodcutting") {
       setSelectedTree(resourceId);
-      localStorage.setItem("selected_tree", resourceId);
     } else {
       setSelectedRock(resourceId);
-      localStorage.setItem("selected_rock", resourceId);
     }
   }
 
@@ -405,6 +365,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setState((s) => purchaseSteadyRoutine(s).state);
   }
 
+  function resetGame() {
+    clearGameStorage(localStorage);
+    window.location.reload();
+  }
+
   return (
     <GameContext.Provider value={{
       state, activeSkill, progress, selectedTree, selectedRock, toasts, loaded,
@@ -412,6 +377,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       practice,
       buyRefinedTechnique,
       buySteadyRoutine,
+      resetGame,
     }}>
       {children}
     </GameContext.Provider>

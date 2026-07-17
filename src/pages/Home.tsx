@@ -90,6 +90,7 @@ export default function Home() {
     practice,
     buyRefinedTechnique,
     buySteadyRoutine,
+    resetGame,
   } = useGame();
   const totalLevel = xpToLevel(state.wcXp) + xpToLevel(state.miningXp);
   const trainingLevel = xpToLevel(state.playableCore.trainingXp);
@@ -329,8 +330,7 @@ export default function Home() {
         <button
           onClick={() => {
             if (window.confirm("Sure you want to reset? Cannot be undone!")) {
-              localStorage.clear();
-              window.location.reload();
+              resetGame();
             }
           }}
           className="border border-red-800 bg-red-950 px-4 py-2 font-mono text-xs font-bold tracking-wider text-red-400 transition-colors hover:bg-red-900"
