@@ -19,6 +19,7 @@ src/
 ├── game/             Canonical state and deterministic gameplay rules
 ├── lib/              Resource configuration and XP calculations
 ├── pages/            Routed application screens
+├── persistence/      Versioned browser storage and legacy migration
 ├── App.tsx           Provider, layout, and route definitions
 └── main.tsx          Browser entry point
 ```
@@ -38,7 +39,7 @@ continue while the player navigates between pages.
 - The production interval and action progress.
 - Resource and XP awards.
 - Purchases and selling.
-- Save loading and writing.
+- Save coordination through the versioned persistence adapter.
 - Offline-progress calculation.
 - Toast notification state.
 
@@ -76,9 +77,9 @@ The module also defines:
 - A versioned `GameSave` envelope that can represent all current persistent
   values without relying on React or browser APIs.
 
-The save envelope is a target boundary only. The current storage adapter still
-uses legacy individual `localStorage` keys; migration to the envelope belongs to
-the later persistence issue.
+The `GameSave` envelope is the canonical persisted format. The storage adapter
+normalizes every field before it reaches React and migrates earlier individual
+`localStorage` keys on first load.
 
 ### Economy domain
 
@@ -105,14 +106,13 @@ milliseconds, and optional starting progress into completed items and remaining
 fractional progress. Active and offline production use this same deterministic
 calculation, so callback frequency no longer determines rewards.
 
-The existing `active_skill_start` key now represents the last accounted
-production boundary. When completed work is awarded, the boundary advances
-while retaining the elapsed time represented by fractional progress. Resource
-changes reset both progress and the boundary.
+`GameSave.activeActivity.startedAt` represents the last accounted production
+boundary. When completed work is awarded, the boundary advances while retaining
+the elapsed time represented by fractional progress. Resource changes reset
+both progress and the boundary.
 
-Offline rewards remain uncapped, and active progress is not yet stored in the
-versioned save envelope. Those concerns remain assigned to later persistence
-and offline-progress issues.
+Offline gathering rewards remain uncapped. Defining and testing that cap remains
+assigned to the later offline-progress issue.
 
 ### Playable-core domain
 
@@ -133,9 +133,9 @@ The experiment uses stable IDs for its action, resource, upgrade, and automation
 unlock. Provisional player-facing names can therefore change after playtesting
 without changing stored identifiers or calculation APIs.
 
-The experiment will initially use the existing legacy-key persistence adapter.
-New fields must have safe defaults so existing saves still load. Moving all
-state into the versioned save envelope remains a separate persistence issue.
+The experiment is stored inside the canonical save envelope. Its fields use safe
+defaults during normalization, and its earlier individual keys are covered by
+the legacy migration.
 
 ### Progression domain
 
@@ -158,21 +158,31 @@ disable resource-selection buttons while a level or tool lock is present.
 
 ## Persistence today
 
-The current save uses separate `localStorage` keys for XP, aggregate resource
-counts, gold, tools, inventory, selected resources, active activity, and the
-activity start time.
+`src/persistence/gameStorage.ts` stores one JSON document under
+`idlegame.save`. The document contains version 1 `GameSave` state, resource
+selections, and active-activity metadata.
 
-Known risks:
+On load, the adapter:
 
-- No schema version or migration system.
-- JSON values are parsed without validation or recovery.
-- State can contain negative, invalid, or partial values.
-- Offline progress is uncapped.
+1. Parses and normalizes a canonical version 1 save field by field.
+2. Preserves malformed or unsupported canonical text under
+   `idlegame.save.recovery` before starting from safe defaults.
+3. Migrates all known individual legacy keys when no canonical save exists.
+4. Writes the normalized result back as the canonical document.
+
+Legacy keys are retained as a non-authoritative migration snapshot but are no
+longer updated. Canonical data always takes precedence. Reset removes the
+canonical key, recovery key, and known legacy keys without clearing unrelated
+origin storage.
+
+Remaining risks:
+
+- Offline gathering progress is uncapped.
 - Multiple tabs can overwrite or duplicate progress.
-- Reset currently clears all storage for the origin.
+- Recovery data has no player-facing export or restore interface.
 
-Save compatibility must be preserved through a documented migration when the
-format changes.
+Any future format change must increment the save version and provide a tested,
+documented migration before writing the new format.
 
 ## Intended boundaries
 
@@ -320,10 +330,11 @@ npm run test:e2e
 npm run build
 ```
 
-Vitest provides deterministic unit tests. Playwright currently provides a basic
-application and navigation smoke test; the critical playable-loop test will be
-added after that loop exists. GitHub Actions runs the validation suite for pull
-requests and pushes to `main`.
+Vitest provides deterministic domain and persistence tests. Playwright covers
+navigation, migration, persistence, production accounting, and the individual
+playable-core steps; the single combined critical-loop test remains a later
+milestone issue. GitHub Actions runs the validation suite for pull requests and
+pushes to `main`.
 
 ## Constraints
 

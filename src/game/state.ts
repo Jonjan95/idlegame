@@ -45,8 +45,8 @@ export interface ActiveActivity {
 /**
  * Canonical target envelope for versioned persistence.
  *
- * The current localStorage adapter still uses legacy individual keys. A later
- * persistence issue will migrate those keys into this envelope.
+ * The browser persistence adapter stores this versioned envelope and migrates
+ * the earlier individual localStorage keys on first load.
  */
 export interface GameSave {
   version: typeof CURRENT_SAVE_VERSION;
