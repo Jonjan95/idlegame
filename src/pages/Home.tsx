@@ -80,12 +80,18 @@ function SkillCard(props: SkillCardProps) {
 }
 
 export default function Home() {
-  const { state, addGold, practice } = useGame();
+  const { state, addGold, practice, buyRefinedTechnique } = useGame();
   const totalLevel = xpToLevel(state.wcXp) + xpToLevel(state.miningXp);
   const trainingLevel = xpToLevel(state.playableCore.trainingXp);
   const trainingLevelProgress = levelProgressPercent(
     state.playableCore.trainingXp
   );
+  const techniqueOwned = state.playableCore.refinedTechniqueOwned;
+  const canAffordTechnique =
+    state.playableCore.mastery >= PLAYABLE_CORE_CONFIG.refinedTechniqueCost;
+  const practiceProgress = techniqueOwned
+    ? PLAYABLE_CORE_CONFIG.upgradedPracticeProgress
+    : PLAYABLE_CORE_CONFIG.basePracticeProgress;
 
   return (
     <main className="flex flex-1 flex-col items-center bg-zinc-950 px-4 py-12 text-white">
@@ -178,12 +184,48 @@ export default function Home() {
             />
           </div>
 
+          <div className="mb-4 border border-zinc-700 bg-zinc-950/70 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-semibold">Refined Technique</p>
+                <p className="mt-1 font-mono text-xs text-white/50">
+                  Practice progress {PLAYABLE_CORE_CONFIG.basePracticeProgress}
+                  {" → "}
+                  {PLAYABLE_CORE_CONFIG.upgradedPracticeProgress}
+                </p>
+              </div>
+              {techniqueOwned ? (
+                <span
+                  className="border border-emerald-700 bg-emerald-950 px-2 py-1 font-mono text-xs text-emerald-300"
+                  data-testid="refined-technique-owned"
+                >
+                  Owned
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={buyRefinedTechnique}
+                  disabled={!canAffordTechnique}
+                  className={`border px-3 py-2 font-mono text-xs font-semibold transition ${
+                    canAffordTechnique
+                      ? "border-violet-500 bg-violet-900/60 text-violet-100 hover:bg-violet-800/70"
+                      : "cursor-not-allowed border-zinc-700 bg-zinc-900 text-white/30"
+                  }`}
+                >
+                  {canAffordTechnique
+                    ? `Buy for ${PLAYABLE_CORE_CONFIG.refinedTechniqueCost} Mastery`
+                    : `Needs ${PLAYABLE_CORE_CONFIG.refinedTechniqueCost} Mastery`}
+                </button>
+              )}
+            </div>
+          </div>
+
           <button
             type="button"
             onClick={practice}
             className="w-full border border-violet-500 bg-violet-900/60 px-4 py-3 font-mono font-semibold text-violet-100 transition hover:bg-violet-800/70 active:translate-y-px"
           >
-            Practice +{PLAYABLE_CORE_CONFIG.basePracticeProgress} progress
+            Practice +{practiceProgress} progress
           </button>
         </section>
 

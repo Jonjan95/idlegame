@@ -10,6 +10,7 @@ export interface PlayableCoreState {
   trainingXp: number;
   completedCycles: number;
   cycleProgress: number;
+  refinedTechniqueOwned: boolean;
 }
 
 /**
@@ -72,6 +73,7 @@ export function createDefaultGameState(): GameState {
       trainingXp: 0,
       completedCycles: 0,
       cycleProgress: 0,
+      refinedTechniqueOwned: false,
     },
   };
 }
@@ -150,6 +152,13 @@ export function validateGameState(state: GameState): StateValidationIssue[] {
     issues.push({
       path: "state.playableCore.cycleProgress",
       message: `must be less than ${PLAYABLE_CORE_CONFIG.cycleProgressRequired}`,
+    });
+  }
+
+  if (typeof state.playableCore.refinedTechniqueOwned !== "boolean") {
+    issues.push({
+      path: "state.playableCore.refinedTechniqueOwned",
+      message: "must be a boolean",
     });
   }
 

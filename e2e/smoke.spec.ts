@@ -128,3 +128,50 @@ test("completes and persists the first Practice cycle", async ({ page }) => {
   await expect(core.getByTestId("core-training-xp")).toHaveText("25");
   await expect(core.getByTestId("core-completed-cycles")).toHaveText("1");
 });
+
+test("buys Refined Technique and improves Practice", async ({ page }) => {
+  const core = page.getByTestId("playable-core");
+  const basePractice = core.getByRole("button", {
+    name: "Practice +25 progress",
+  });
+
+  await expect(
+    core.getByRole("button", { name: "Needs 3 Mastery" })
+  ).toBeDisabled();
+
+  for (let action = 0; action < 12; action += 1) {
+    await basePractice.click();
+  }
+
+  await expect(core.getByTestId("core-mastery")).toHaveText("3");
+  await expect(core.getByTestId("core-training-xp")).toHaveText("75");
+  await expect(core.getByTestId("core-completed-cycles")).toHaveText("3");
+
+  await core.getByRole("button", { name: "Buy for 3 Mastery" }).click();
+
+  await expect(core.getByTestId("core-mastery")).toHaveText("0");
+  await expect(core.getByTestId("core-training-xp")).toHaveText("75");
+  await expect(core.getByTestId("core-completed-cycles")).toHaveText("3");
+  await expect(core.getByTestId("refined-technique-owned")).toHaveText(
+    "Owned"
+  );
+
+  await core
+    .getByRole("button", { name: "Practice +40 progress" })
+    .click();
+  await expect(
+    core.getByRole("progressbar", { name: "Practice cycle progress" })
+  ).toHaveAttribute("aria-valuenow", "40");
+
+  await page.reload();
+
+  await expect(core.getByTestId("refined-technique-owned")).toHaveText(
+    "Owned"
+  );
+  await expect(
+    core.getByRole("button", { name: "Practice +40 progress" })
+  ).toBeVisible();
+  await expect(
+    core.getByRole("progressbar", { name: "Practice cycle progress" })
+  ).toHaveAttribute("aria-valuenow", "40");
+});
