@@ -86,6 +86,7 @@ export function useGame(): GameContextValue {
 let nextToastId = 0;
 
 export function GameProvider({ children }: { children: ReactNode }) {
+  const resetInProgress = useRef(false);
   const lastTickAt = useRef<number | null>(null);
   const progressRef = useRef(0);
   const observedCoreCycles = useRef(0);
@@ -167,7 +168,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || resetInProgress.current) return;
 
     const resourceId = activeSkill
       ? activeSkill === "woodcutting"
@@ -247,6 +248,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     lastCoreTickAt.current = Date.now();
     const interval = setInterval(() => {
+      if (resetInProgress.current) return;
+
       const now = Date.now();
       const previousTickAt = lastCoreTickAt.current ?? now;
       lastCoreTickAt.current = now;
@@ -271,6 +274,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     lastTickAt.current = Date.now();
 
     const interval = setInterval(() => {
+      if (resetInProgress.current) return;
+
       const now = Date.now();
       const previousTickAt = lastTickAt.current ?? now;
       lastTickAt.current = now;
@@ -372,6 +377,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   function resetGame() {
+    resetInProgress.current = true;
+    lastTickAt.current = null;
+    lastCoreTickAt.current = null;
+    activeActivityStartedAt.current = null;
+    progressRef.current = 0;
+
+    const defaultSelections = createDefaultResourceSelections();
+    setState(createDefaultGameState());
+    setActiveSkill(null);
+    setProgress(0);
+    setSelectedTree(defaultSelections.woodcutting);
+    setSelectedRock(defaultSelections.mining);
+    setToasts([]);
+
     clearGameStorage(localStorage);
     window.location.reload();
   }

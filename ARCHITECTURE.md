@@ -205,7 +205,11 @@ On load, the adapter:
 Legacy keys are retained as a non-authoritative migration snapshot but are no
 longer updated. Canonical data always takes precedence. Reset removes the
 canonical key, recovery key, and known legacy keys without clearing unrelated
-origin storage.
+origin storage. `GameContext` marks reset as in progress before clearing those
+keys, suppresses all subsequent persistence writes, and prevents active
+production callbacks from applying more progress while the page reload begins.
+It also restores in-memory defaults so reset remains visible even if navigation
+is delayed.
 
 Remaining risks:
 
