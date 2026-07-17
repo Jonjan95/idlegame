@@ -149,6 +149,26 @@ The experiment is stored inside the canonical save envelope. Its fields use safe
 defaults during normalization, and its earlier individual keys are covered by
 the legacy migration.
 
+### Proposed first-trial boundary
+
+The First Trial contract in `GAME_DESIGN.md` is not implemented. A future issue
+should keep its rules in a pure domain module that:
+
+- Reads Training XP and derives Training Level through the existing progression
+  rule.
+- Returns a structured locked, ready, or completed status.
+- Applies a deterministic one-time completion command only when ready.
+- Rejects duplicate completion without changing state.
+- Does not read the browser clock, React, storage, or presentation labels.
+
+React should render the structured status, dispatch the attempt, and display
+feedback without calculating the Level 3 threshold or mutating progression.
+
+Persistence will require one completion flag that defaults safely for older
+saves. Before implementation, the issue must document whether the compatible
+field addition stays in save version 1 or requires a new version and migration.
+No schema change is authorized by the design contract alone.
+
 ### Progression domain
 
 `src/game/progression.ts` evaluates the current prototype's centralized resource
