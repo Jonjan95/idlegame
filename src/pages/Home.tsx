@@ -393,12 +393,14 @@ export default function Home() {
 
       <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
         <button
+          type="button"
           onClick={() => addGold(1000)}
           className="border border-yellow-700 bg-yellow-950 px-4 py-2 font-mono text-xs font-bold tracking-wider text-yellow-400 transition-colors hover:bg-yellow-900"
         >
           +1000 💰
         </button>
         <button
+          type="button"
           onClick={() => {
             if (window.confirm("Sure you want to reset? Cannot be undone!")) {
               resetGame();

@@ -493,40 +493,141 @@ test("migrates a legacy gameplay fixture to the canonical save", async ({
   });
 });
 
-test("wipes only IdleGame save data through the dashboard", async ({ page }) => {
-  const core = page.getByTestId("playable-core");
-  const practice = core.getByRole("button", { name: "Practice +25 progress" });
-  await practice.click();
-  await expect(
-    core.getByRole("progressbar", { name: "Practice cycle progress" })
-  ).toHaveAttribute("aria-valuenow", "25");
+test("wipes a progressed save while game loops are active", async ({ page }) => {
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
 
   await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem("idlegame.save")!);
+    save.state.wcXp = 200;
+    save.state.wcLogs = 3;
+    save.state.gold = 42;
+    save.state.inventory.tree = 3;
+    save.state.tools.bronzeAxe = true;
+    save.state.playableCore.mastery = 5;
+    save.state.playableCore.trainingXp = 300;
+    save.state.playableCore.completedCycles = 12;
+    save.state.playableCore.cycleProgress = 0;
+    save.state.playableCore.refinedTechniqueOwned = true;
+    save.state.playableCore.steadyRoutineOwned = true;
+    save.activeActivity = {
+      skill: "woodcutting",
+      resourceId: "tree",
+      startedAt: Date.now(),
+    };
+    localStorage.setItem("idlegame.save", JSON.stringify(save));
     localStorage.setItem("unrelated.application", "keep-me");
+  });
+  await page.reload();
+
+  const core = page.getByTestId("playable-core");
+  await expect(core.getByTestId("refined-technique-owned")).toHaveText(
+    "Owned"
+  );
+  await expect(core.getByTestId("steady-routine-owned")).toHaveText(
+    "Running"
+  );
+  await expect(
+    core.getByRole("progressbar", { name: "Practice cycle progress" })
+  ).not.toHaveAttribute("aria-valuenow", "0");
+  await expect(
+    page.getByRole("button", { name: "Stop Woodcutting" })
+  ).toBeVisible();
+
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.getByRole("button", { name: "Wipe Save" }).click();
+
+  await expect(core.getByTestId("steady-routine-owned")).toHaveText(
+    "Running"
+  );
+  await expect(
+    page.getByRole("button", { name: "Stop Woodcutting" })
+  ).toBeVisible();
+  const canceledSave = await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem("idlegame.save")!);
+    return {
+      gold: save.state.gold,
+      steadyRoutineOwned: save.state.playableCore.steadyRoutineOwned,
+      activeSkill: save.activeActivity?.skill,
+    };
+  });
+  expect(canceledSave).toEqual({
+    gold: 42,
+    steadyRoutineOwned: true,
+    activeSkill: "woodcutting",
   });
 
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Wipe Save" }).click();
 
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+  await expect(core.getByTestId("core-mastery")).toHaveText("0");
+  await expect(core.getByTestId("core-training-xp")).toHaveText("0");
+  await expect(core.getByTestId("core-completed-cycles")).toHaveText("0");
   await expect(
-    page.getByRole("heading", { name: "Dashboard" })
-  ).toBeVisible();
-  await expect(
-    page
-      .getByTestId("playable-core")
-      .getByRole("progressbar", { name: "Practice cycle progress" })
+    core.getByRole("progressbar", { name: "Practice cycle progress" })
   ).toHaveAttribute("aria-valuenow", "0");
+  await expect(
+    core.getByRole("button", { name: "Needs 3 Mastery" })
+  ).toBeDisabled();
+  await expect(
+    core.getByRole("button", { name: "Requires Refined Technique" })
+  ).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Start Woodcutting" })
+  ).toBeVisible();
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("idlegame.save") !== null)
+    )
+    .toBe(true);
 
   const storage = await page.evaluate(() => ({
     unrelated: localStorage.getItem("unrelated.application"),
     legacyXp: localStorage.getItem("wc_xp"),
     recovery: localStorage.getItem("idlegame.save.recovery"),
-    saveVersion: JSON.parse(localStorage.getItem("idlegame.save")!).version,
+    save: JSON.parse(localStorage.getItem("idlegame.save")!),
   }));
   expect(storage).toEqual({
     unrelated: "keep-me",
     legacyXp: null,
     recovery: null,
-    saveVersion: 1,
+    save: {
+      version: 1,
+      state: {
+        wcXp: 0,
+        wcLogs: 0,
+        miningXp: 0,
+        miningOres: 0,
+        gold: 0,
+        tools: {
+          bronzeAxe: false,
+          ironAxe: false,
+          bronzePickaxe: false,
+          ironPickaxe: false,
+        },
+        inventory: {},
+        playableCore: {
+          mastery: 0,
+          trainingXp: 0,
+          completedCycles: 0,
+          cycleProgress: 0,
+          refinedTechniqueOwned: false,
+          steadyRoutineOwned: false,
+        },
+      },
+      selections: {
+        woodcutting: "tree",
+        mining: "rock",
+      },
+      activeActivity: null,
+    },
   });
+
+  await page.reload();
+  await expect(core.getByTestId("core-mastery")).toHaveText("0");
+  await expect(core.getByTestId("core-training-xp")).toHaveText("0");
+  await expect(
+    page.getByRole("button", { name: "Start Woodcutting" })
+  ).toBeVisible();
 });
