@@ -3,9 +3,10 @@
 IdleGame is an early browser-based incremental RPG prototype built with React,
 TypeScript, Vite, Tailwind CSS, and React Router.
 
-The project is in a foundation and experimentation phase. Its final theme,
-setting, and long-term game structure have not been decided. The current
-woodcutting, mining, inventory, and shop systems are prototype scaffolding used
+The foundation milestone is complete and the project is entering a controlled
+design-experiment phase. Its final theme, setting, and long-term game structure
+have not been decided. The current woodcutting, mining, inventory, and shop
+systems are prototype scaffolding used
 to explore progression, resource generation, upgrades, automation, persistence,
 and visual feedback. They are not a commitment to a gathering-focused final
 game.
@@ -29,9 +30,10 @@ The application currently includes:
 - Deterministic gathering offline progress with an eight-hour cap.
 - Notifications and visible action progress.
 
-The remaining foundation work is primarily the milestone close-out review and
-recording the next small design hypothesis. Multi-tab coordination remains a
-known technical risk outside the active milestone. See
+The next design hypothesis explores character growth through training that
+enables one small meaningful trial. The trial type and final theme remain open.
+Multi-tab coordination remains a known technical risk outside the completed
+foundation milestone. See
 [ARCHITECTURE.md](./ARCHITECTURE.md) and [ROADMAP.md](./ROADMAP.md).
 
 ## Current direction
@@ -44,8 +46,9 @@ The working goal is a progression-focused incremental RPG with:
 - Basic automation that is earned rather than available immediately.
 - Gradual unlocking and room for interconnected systems later.
 
-The first milestone, **IdleGame Foundation & Playable Core**, will prove only a
-small loop:
+The completed **IdleGame Foundation & Playable Core** milestone proved this
+small loop can be implemented, persisted, validated, and played from a fresh
+save:
 
 ```text
 Perform a meaningful action
@@ -56,8 +59,9 @@ Perform a meaningful action
 → observe continued progress
 ```
 
-The milestone will not decide the final theme or introduce large speculative
-systems.
+The next experiment will ask whether character training feels more meaningful
+when it enables one concrete objective. It will not begin with a combat system,
+equipment model, world map, story campaign, or speculative feature backlog.
 
 ## Technology
 
