@@ -25,13 +25,13 @@ The application currently includes:
 - Selling resources for gold.
 - Tool purchases that unlock additional resources.
 - Versioned, validated local browser saves with legacy-key migration.
-- Basic offline resource generation.
+- Deterministic gathering offline progress with an eight-hour cap.
 - Notifications and visible action progress.
 
-The remaining foundation risks are primarily bounded offline progress,
-multi-tab coordination, and completing the combined playable-loop test and
-manual evaluation. See [ARCHITECTURE.md](./ARCHITECTURE.md) and
-[ROADMAP.md](./ROADMAP.md).
+The remaining foundation work is primarily the combined playable-loop browser
+test, feedback refinement, and manual evaluation. Multi-tab coordination remains
+a known technical risk outside the active milestone. See
+[ARCHITECTURE.md](./ARCHITECTURE.md) and [ROADMAP.md](./ROADMAP.md).
 
 ## Current direction
 

@@ -26,6 +26,10 @@ import {
   progressToElapsedMs,
 } from "../game/production";
 import {
+  OFFLINE_PROGRESS_CONFIG,
+  calculateOfflineProduction,
+} from "../game/offlineProgress";
+import {
   PLAYABLE_CORE_CONFIG,
   applySteadyRoutineElapsed,
   performPractice,
@@ -124,9 +128,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
         (skill === "woodcutting" ? storedTree : storedRock);
       const resource = getResource(skill, resourceId);
       const now = Date.now();
-      const production = calculateElapsedProduction(
+      const production = calculateOfflineProduction(
         resource.speed,
-        now - startTime
+        startTime,
+        now
       );
       final = awardResource(saved, {
         skill,
@@ -135,19 +140,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
         xpPerItem: resource.xpPerItem,
       });
 
-      const remainingElapsedMs = progressToElapsedMs(
-        resource.speed,
-        production.progress
-      );
-      activeActivityStartedAt.current = now - remainingElapsedMs;
+      activeActivityStartedAt.current = production.accountingStartedAt;
       setActiveSkill(skill);
       setProgress(production.progress);
       progressRef.current = production.progress;
 
       if (production.completedItems > 0) {
+        const capNotice = production.capApplied
+          ? `; ${
+              OFFLINE_PROGRESS_CONFIG.gatheringMaxElapsedMs / 3_600_000
+            }h cap applied`
+          : "";
         pushToast(
           skill === "woodcutting" ? "🪵" : "🪨",
-          `+${production.completedItems} ${resource.name} (offline)`
+          `+${production.completedItems} ${resource.name} (offline${capNotice})`
         );
       }
     }
