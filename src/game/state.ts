@@ -11,6 +11,7 @@ export interface PlayableCoreState {
   completedCycles: number;
   cycleProgress: number;
   refinedTechniqueOwned: boolean;
+  steadyRoutineOwned: boolean;
 }
 
 /**
@@ -74,6 +75,7 @@ export function createDefaultGameState(): GameState {
       completedCycles: 0,
       cycleProgress: 0,
       refinedTechniqueOwned: false,
+      steadyRoutineOwned: false,
     },
   };
 }
@@ -110,6 +112,19 @@ function validateNonNegativeInteger(
   return [];
 }
 
+function validateNonNegativeFinite(
+  value: number,
+  path: string
+): StateValidationIssue[] {
+  if (!Number.isFinite(value)) {
+    return [{ path, message: "must be finite" }];
+  }
+  if (value < 0) {
+    return [{ path, message: "must not be negative" }];
+  }
+  return [];
+}
+
 function validateIdentifier(
   value: string,
   path: string
@@ -139,7 +154,7 @@ export function validateGameState(state: GameState): StateValidationIssue[] {
       state.playableCore.completedCycles,
       "state.playableCore.completedCycles"
     ),
-    ...validateNonNegativeInteger(
+    ...validateNonNegativeFinite(
       state.playableCore.cycleProgress,
       "state.playableCore.cycleProgress"
     ),
@@ -158,6 +173,13 @@ export function validateGameState(state: GameState): StateValidationIssue[] {
   if (typeof state.playableCore.refinedTechniqueOwned !== "boolean") {
     issues.push({
       path: "state.playableCore.refinedTechniqueOwned",
+      message: "must be a boolean",
+    });
+  }
+
+  if (typeof state.playableCore.steadyRoutineOwned !== "boolean") {
+    issues.push({
+      path: "state.playableCore.steadyRoutineOwned",
       message: "must be a boolean",
     });
   }

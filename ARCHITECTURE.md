@@ -118,13 +118,16 @@ and offline-progress issues.
 
 `src/game/playableCoreConfig.ts` owns the stable IDs and centralized values.
 `src/game/playableCore.ts` applies deterministic Practice progress,
-completed-cycle rewards, and the Refined Technique purchase defined by the
-theme-neutral contract in `GAME_DESIGN.md`. React dispatches these commands and
-renders their results without calculating rewards or affordability in the
+completed-cycle rewards, Refined Technique and Steady Routine purchases, and
+elapsed online automation defined by the theme-neutral contract in
+`GAME_DESIGN.md`. React dispatches these commands and supplies elapsed browser
+time without calculating rewards, affordability, or production in the
 component.
 
-The same module will gain elapsed automation calculation in its dedicated
-follow-up issue.
+Manual and automatic progress share the same fractional cycle. Steady Routine
+does not store a last-accounted timestamp, so reload resumes from saved progress
+without treating closed time as automation. Offline training remains a separate
+milestone issue.
 
 The experiment uses stable IDs for its action, resource, upgrade, and automation
 unlock. Provisional player-facing names can therefore change after playtesting

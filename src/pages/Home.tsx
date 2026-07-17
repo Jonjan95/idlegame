@@ -3,6 +3,10 @@ import { useGame, SkillName } from "../context/GameContext";
 import { xpToLevel, levelProgressPercent } from "../lib/xp";
 import { PLAYABLE_CORE_CONFIG } from "../game/playableCore";
 
+function formatCycleProgress(progress: number): string {
+  return Number.isInteger(progress) ? String(progress) : progress.toFixed(1);
+}
+
 interface SkillCardProps {
   name: string;
   skillKey: SkillName;
@@ -80,7 +84,13 @@ function SkillCard(props: SkillCardProps) {
 }
 
 export default function Home() {
-  const { state, addGold, practice, buyRefinedTechnique } = useGame();
+  const {
+    state,
+    addGold,
+    practice,
+    buyRefinedTechnique,
+    buySteadyRoutine,
+  } = useGame();
   const totalLevel = xpToLevel(state.wcXp) + xpToLevel(state.miningXp);
   const trainingLevel = xpToLevel(state.playableCore.trainingXp);
   const trainingLevelProgress = levelProgressPercent(
@@ -92,6 +102,10 @@ export default function Home() {
   const practiceProgress = techniqueOwned
     ? PLAYABLE_CORE_CONFIG.upgradedPracticeProgress
     : PLAYABLE_CORE_CONFIG.basePracticeProgress;
+  const routineOwned = state.playableCore.steadyRoutineOwned;
+  const canAffordRoutine =
+    techniqueOwned &&
+    state.playableCore.mastery >= PLAYABLE_CORE_CONFIG.steadyRoutineCost;
 
   return (
     <main className="flex flex-1 flex-col items-center bg-zinc-950 px-4 py-12 text-white">
@@ -156,7 +170,7 @@ export default function Home() {
             <div className="mb-1 flex justify-between font-mono text-xs text-white/50">
               <span>Current cycle</span>
               <span>
-                {state.playableCore.cycleProgress} /{" "}
+                {formatCycleProgress(state.playableCore.cycleProgress)} /{" "}
                 {PLAYABLE_CORE_CONFIG.cycleProgressRequired}
               </span>
             </div>
@@ -215,6 +229,44 @@ export default function Home() {
                   {canAffordTechnique
                     ? `Buy for ${PLAYABLE_CORE_CONFIG.refinedTechniqueCost} Mastery`
                     : `Needs ${PLAYABLE_CORE_CONFIG.refinedTechniqueCost} Mastery`}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="mb-4 border border-zinc-700 bg-zinc-950/70 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-semibold">Steady Routine</p>
+                <p className="mt-1 font-mono text-xs text-white/50">
+                  +{PLAYABLE_CORE_CONFIG.automationProgressPerSecond} progress
+                  per second while open
+                </p>
+              </div>
+              {routineOwned ? (
+                <span
+                  className="flex items-center gap-1.5 border border-sky-700 bg-sky-950 px-2 py-1 font-mono text-xs text-sky-300"
+                  data-testid="steady-routine-owned"
+                >
+                  <span className="h-1.5 w-1.5 animate-pulse bg-sky-400" />
+                  Running
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={buySteadyRoutine}
+                  disabled={!canAffordRoutine}
+                  className={`border px-3 py-2 font-mono text-xs font-semibold transition ${
+                    canAffordRoutine
+                      ? "border-sky-500 bg-sky-900/60 text-sky-100 hover:bg-sky-800/70"
+                      : "cursor-not-allowed border-zinc-700 bg-zinc-900 text-white/30"
+                  }`}
+                >
+                  {!techniqueOwned
+                    ? "Requires Refined Technique"
+                    : canAffordRoutine
+                    ? `Unlock for ${PLAYABLE_CORE_CONFIG.steadyRoutineCost} Mastery`
+                    : `Needs ${PLAYABLE_CORE_CONFIG.steadyRoutineCost} Mastery`}
                 </button>
               )}
             </div>

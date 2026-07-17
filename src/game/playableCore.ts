@@ -1,5 +1,9 @@
 import type { GameState } from "./state";
 import { PLAYABLE_CORE_CONFIG } from "./playableCoreConfig";
+import {
+  PRODUCTION_BASE_STEP_MS,
+  calculateElapsedProduction,
+} from "./production";
 
 export { PLAYABLE_CORE_CONFIG, PLAYABLE_CORE_IDS } from "./playableCoreConfig";
 
@@ -9,6 +13,11 @@ export interface PlayableCoreProgressResult {
 }
 
 export interface RefinedTechniquePurchaseResult {
+  state: GameState;
+  purchased: boolean;
+}
+
+export interface SteadyRoutinePurchaseResult {
   state: GameState;
   purchased: boolean;
 }
@@ -23,35 +32,29 @@ function isValidCoreState(state: GameState): boolean {
     core.trainingXp >= 0 &&
     Number.isSafeInteger(core.completedCycles) &&
     core.completedCycles >= 0 &&
-    Number.isSafeInteger(core.cycleProgress) &&
+    Number.isFinite(core.cycleProgress) &&
     core.cycleProgress >= 0 &&
     core.cycleProgress < PLAYABLE_CORE_CONFIG.cycleProgressRequired &&
-    typeof core.refinedTechniqueOwned === "boolean"
+    typeof core.refinedTechniqueOwned === "boolean" &&
+    typeof core.steadyRoutineOwned === "boolean"
   );
 }
 
-export function applyPlayableCoreProgress(
+function applyCompletedCycles(
   state: GameState,
-  progressAmount: number
+  completedCycles: number,
+  cycleProgress: number
 ): PlayableCoreProgressResult {
   if (
-    !isValidCoreState(state) ||
-    !Number.isSafeInteger(progressAmount) ||
-    progressAmount <= 0
+    !Number.isSafeInteger(completedCycles) ||
+    completedCycles < 0 ||
+    !Number.isFinite(cycleProgress) ||
+    cycleProgress < 0 ||
+    cycleProgress >= PLAYABLE_CORE_CONFIG.cycleProgressRequired
   ) {
     return { state, completedCycles: 0 };
   }
 
-  const totalProgress = state.playableCore.cycleProgress + progressAmount;
-  if (!Number.isSafeInteger(totalProgress)) {
-    return { state, completedCycles: 0 };
-  }
-
-  const completedCycles = Math.floor(
-    totalProgress / PLAYABLE_CORE_CONFIG.cycleProgressRequired
-  );
-  const cycleProgress =
-    totalProgress % PLAYABLE_CORE_CONFIG.cycleProgressRequired;
   const masteryAward =
     completedCycles * PLAYABLE_CORE_CONFIG.masteryPerCycle;
   const xpAward =
@@ -71,6 +74,13 @@ export function applyPlayableCoreProgress(
     return { state, completedCycles: 0 };
   }
 
+  if (
+    completedCycles === 0 &&
+    cycleProgress === state.playableCore.cycleProgress
+  ) {
+    return { state, completedCycles: 0 };
+  }
+
   return {
     state: {
       ...state,
@@ -84,6 +94,31 @@ export function applyPlayableCoreProgress(
     },
     completedCycles,
   };
+}
+
+export function applyPlayableCoreProgress(
+  state: GameState,
+  progressAmount: number
+): PlayableCoreProgressResult {
+  if (
+    !isValidCoreState(state) ||
+    !Number.isSafeInteger(progressAmount) ||
+    progressAmount <= 0
+  ) {
+    return { state, completedCycles: 0 };
+  }
+
+  const totalProgress = state.playableCore.cycleProgress + progressAmount;
+  if (!Number.isFinite(totalProgress) || totalProgress > Number.MAX_SAFE_INTEGER) {
+    return { state, completedCycles: 0 };
+  }
+
+  const completedCycles = Math.floor(
+    totalProgress / PLAYABLE_CORE_CONFIG.cycleProgressRequired
+  );
+  const cycleProgress =
+    totalProgress % PLAYABLE_CORE_CONFIG.cycleProgressRequired;
+  return applyCompletedCycles(state, completedCycles, cycleProgress);
 }
 
 export function performPractice(state: GameState): PlayableCoreProgressResult {
@@ -119,4 +154,63 @@ export function purchaseRefinedTechnique(
     },
     purchased: true,
   };
+}
+
+export function purchaseSteadyRoutine(
+  state: GameState
+): SteadyRoutinePurchaseResult {
+  if (
+    !isValidCoreState(state) ||
+    !state.playableCore.refinedTechniqueOwned ||
+    state.playableCore.steadyRoutineOwned ||
+    state.playableCore.mastery < PLAYABLE_CORE_CONFIG.steadyRoutineCost
+  ) {
+    return { state, purchased: false };
+  }
+
+  return {
+    state: {
+      ...state,
+      playableCore: {
+        ...state.playableCore,
+        mastery:
+          state.playableCore.mastery -
+          PLAYABLE_CORE_CONFIG.steadyRoutineCost,
+        steadyRoutineOwned: true,
+      },
+    },
+    purchased: true,
+  };
+}
+
+export function applySteadyRoutineElapsed(
+  state: GameState,
+  elapsedMs: number
+): PlayableCoreProgressResult {
+  if (
+    !isValidCoreState(state) ||
+    !state.playableCore.steadyRoutineOwned ||
+    !Number.isFinite(elapsedMs) ||
+    elapsedMs < 0
+  ) {
+    return { state, completedCycles: 0 };
+  }
+
+  const speedPerBaseStep =
+    (PLAYABLE_CORE_CONFIG.automationProgressPerSecond *
+      PRODUCTION_BASE_STEP_MS) /
+    1000;
+  const production = calculateElapsedProduction(
+    speedPerBaseStep,
+    elapsedMs,
+    state.playableCore.cycleProgress
+  );
+  const normalizedProgress =
+    Math.round(production.progress * 1_000_000) / 1_000_000;
+
+  return applyCompletedCycles(
+    state,
+    production.completedItems,
+    normalizedProgress
+  );
 }
