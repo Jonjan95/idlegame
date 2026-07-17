@@ -138,6 +138,119 @@ The next design issue must specify only:
 The issue must not implement the trial. It should produce a small contract that
 can be accepted, revised, or rejected before source code changes.
 
+## Proposed first-trial contract
+
+This contract is ready for design review but is not implemented. Its purpose is
+to test whether the existing training loop feels more meaningful when lifetime
+character growth enables one deliberate objective.
+
+### Stable concepts and provisional wording
+
+Stable IDs must not depend on the eventual theme:
+
+| Purpose | Stable ID | Provisional wording |
+| --- | --- | --- |
+| Readiness capability | `training_level` | Training Level |
+| One-time objective | `first_trial` | First Trial |
+| Completion milestone | `first_trial_completed` | Trial Completed |
+| Follow-up objective | `reach_training_level_4` | Reach Training Level 4 |
+
+The player-facing words may change after the theme is explored. The stable
+concepts describe only their role in the experiment.
+
+### Readiness
+
+Training Level is the only capability read by the First Trial. The provisional
+requirement is Training Level 3, which begins at 400 lifetime Training XP under
+the existing curve:
+
+```text
+(level - 1)² × 100
+= (3 - 1)² × 100
+= 400 Training XP
+```
+
+The normal fresh-save path reaches Steady Routine after eleven cycles and 275
+Training XP. Readiness therefore requires another 125 Training XP, or five
+completed cycles at the current 25 XP reward. Those cycles may be completed by
+manual Practice, online Steady Routine, or a mixture of both.
+
+Refined Technique and Steady Routine improve the route to readiness but are not
+additional trial requirements. Mastery is not consumed, and the attempt has no
+currency, inventory, energy, ticket, or cooldown cost.
+
+Before readiness, the trial presentation should show:
+
+- The current Training Level and the Level 3 requirement.
+- Progress toward 400 Training XP.
+- A concise explanation that further training enables the attempt.
+- A disabled attempt action that does not imply another hidden requirement.
+
+### Attempt and outcome
+
+Reaching the requirement makes one deliberate `Attempt First Trial` action
+available. The trial does not complete automatically when the threshold is
+crossed.
+
+The first outcome is deterministic and guaranteed once ready. It contains no
+failure chance, random roll, choice, combat resolution, or consumable cost. The
+attempt produces concise visible success feedback, then records a permanent
+completion milestone. Completion does not spend Training XP or Mastery and does
+not award a new currency, item, attribute, or upgrade.
+
+This deliberately small result isolates the design question: does earning and
+completing an objective make training feel purposeful? If the answer is no, the
+playtest should identify whether the missing ingredient is presentation,
+pacing, choice, or reward before any larger system is proposed.
+
+### After completion
+
+The completed trial remains visibly marked and cannot be repeated for rewards.
+The only new objective shown is `Reach Training Level 4`. No second trial or
+Level 4 reward is promised by this contract.
+
+The existing Practice button and Steady Routine continue operating after
+completion. The milestone supplements the current loop; it does not replace or
+reset it.
+
+### Persistence expectation
+
+A future implementation will need one persistent completion flag with a safe
+default of `false`. Saves created before that field exists must load without
+losing any current progression, and missing data must normalize to incomplete.
+The implementation issue must document whether this compatible addition remains
+within the current save version or requires a versioned migration before it is
+written.
+
+No save field or migration is introduced by this contract.
+
+### Manual evaluation questions
+
+The implementation playtest must ask:
+
+1. Is the Level 3 readiness requirement understandable before it is reached?
+2. Does the period from automation at 275 XP to readiness at 400 XP build
+   anticipation, or feel like passive waiting?
+3. Does requiring a deliberate attempt make the threshold feel more meaningful
+   than an automatic unlock?
+4. Does guaranteed success clearly communicate that training enabled the
+   result?
+5. Is the persistent completion state a satisfying enough payoff for this
+   minimal experiment?
+6. Does `Reach Training Level 4` provide direction without falsely promising
+   content that does not exist?
+7. If the trial feels weak, is the problem clarity, pacing, lack of choice, or
+   lack of reward?
+
+Automated tests can verify readiness and persistence rules; they cannot answer
+these questions.
+
+### Contract exclusions
+
+This contract does not include combat, enemies, health, damage, random failure,
+loot, equipment, attributes, locations, a world map, story, repeatable rewards,
+a second trial, another currency, or a final theme.
+
 ## Playable-core contract
 
 The first experiment is a separate dashboard training panel. It does not

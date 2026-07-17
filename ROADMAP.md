@@ -117,7 +117,7 @@ not committed by the next design step:
 Any of them requires a separate evidence-based hypothesis before it enters the
 roadmap.
 
-## Next controlled design step
+## Active design issue
 
 The approved direction is to explore character growth through training that
 enables one small meaningful trial:
@@ -130,12 +130,17 @@ Train
 → return with one new objective
 ```
 
-The only recommended next issue is:
+The single active issue is:
 
 **Specify the first character-growth and trial contract.** Define the intended
 feeling, one capability, readiness communication, one trial outcome, one visible
 payoff, and the relationship to the existing training loop. Produce a design
 contract only; do not implement mechanics or create a follow-on backlog.
+
+The proposed contract uses existing Training Level as the sole readiness
+capability, with a provisional Level 3 threshold and deterministic one-time
+completion. No implementation issue should be created until that contract is
+reviewed and accepted.
 
 Combat, loot, equipment, multiple attributes, additional currencies, a world
 map, story, and the final theme remain undecided and unplanned.
