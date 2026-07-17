@@ -314,7 +314,7 @@ Vitest should cover deterministic rules, including:
 
 ### Browser test
 
-One critical Playwright test should cover a fresh save through:
+One critical Playwright test covers a fresh save through:
 
 ```text
 interaction
@@ -326,7 +326,10 @@ interaction
 → reload persistence
 ```
 
-The browser test should avoid long arbitrary sleeps and developer shortcuts.
+The journey uses only player-visible controls, condition-based assertions, and
+the normal fresh-save setup. It does not seed progression or use developer
+shortcuts. Focused browser scenarios remain alongside it for narrower failure
+diagnosis.
 
 ### Manual testing
 
@@ -346,10 +349,9 @@ npm run build
 ```
 
 Vitest provides deterministic domain and persistence tests. Playwright covers
-navigation, migration, persistence, production accounting, and the individual
-playable-core steps; the single combined critical-loop test remains a later
-milestone issue. GitHub Actions runs the validation suite for pull requests and
-pushes to `main`.
+navigation, migration, persistence, production accounting, focused
+playable-core steps, and the combined fresh-save critical loop. GitHub Actions
+runs the validation suite for pull requests and pushes to `main`.
 
 ## Constraints
 

@@ -293,6 +293,106 @@ test("unlocks Steady Routine and keeps manual Practice", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("completes the critical playable-core journey from a fresh save", async ({
+  page,
+}) => {
+  const core = page.getByTestId("playable-core");
+  const cycleProgress = core.getByRole("progressbar", {
+    name: "Practice cycle progress",
+  });
+  const basePractice = core.getByRole("button", {
+    name: "Practice +25 progress",
+  });
+
+  await expect(core.getByTestId("core-guidance")).toContainText(
+    "Refined Technique · 3 Mastery remaining"
+  );
+
+  for (let action = 0; action < 4; action += 1) {
+    await basePractice.click();
+  }
+  await expect(core.getByTestId("core-mastery")).toHaveText("1");
+  await expect(core.getByTestId("core-training-xp")).toHaveText("25");
+  await expect(core.getByTestId("core-completed-cycles")).toHaveText("1");
+
+  for (let action = 0; action < 8; action += 1) {
+    await basePractice.click();
+  }
+  await expect(core.getByTestId("core-mastery")).toHaveText("3");
+
+  await core.getByRole("button", { name: "Buy for 3 Mastery" }).click();
+  await expect(core.getByTestId("refined-technique-owned")).toHaveText(
+    "Owned"
+  );
+  await expect(core.getByTestId("practice-strength")).toHaveText(
+    "Manual Practice: +40 progress per press"
+  );
+  await expect(core.getByTestId("core-guidance")).toContainText(
+    "Steady Routine · 8 Mastery remaining"
+  );
+
+  const upgradedPractice = core.getByRole("button", {
+    name: "Practice +40 progress",
+  });
+  for (let action = 0; action < 20; action += 1) {
+    await upgradedPractice.click();
+  }
+  await expect(core.getByTestId("core-mastery")).toHaveText("8");
+  await expect(core.getByTestId("core-training-xp")).toHaveText("275");
+  await expect(core.getByTestId("core-completed-cycles")).toHaveText("11");
+
+  await core
+    .getByRole("button", { name: "Unlock for 8 Mastery" })
+    .click();
+  await expect(core.getByTestId("steady-routine-owned")).toHaveText(
+    "Running"
+  );
+  await expect(core.getByTestId("core-guidance")).toContainText(
+    "Automation active · Manual Practice remains available"
+  );
+  await expect(cycleProgress).not.toHaveAttribute("aria-valuenow", "0");
+
+  const progressBeforeManual = Number(
+    await cycleProgress.getAttribute("aria-valuenow")
+  );
+  const cyclesBeforeManual = Number(
+    await core.getByTestId("core-completed-cycles").innerText()
+  );
+  await upgradedPractice.click();
+  const progressAfterManual = Number(
+    await cycleProgress.getAttribute("aria-valuenow")
+  );
+  const cyclesAfterManual = Number(
+    await core.getByTestId("core-completed-cycles").innerText()
+  );
+  expect(
+    (cyclesAfterManual - cyclesBeforeManual) * 100 +
+      progressAfterManual -
+      progressBeforeManual
+  ).toBeGreaterThanOrEqual(40);
+
+  await page.reload();
+
+  await expect(core.getByTestId("refined-technique-owned")).toHaveText(
+    "Owned"
+  );
+  await expect(core.getByTestId("steady-routine-owned")).toHaveText(
+    "Running"
+  );
+  await expect(core.getByTestId("core-guidance")).toContainText(
+    "Automation active · Manual Practice remains available"
+  );
+  await expect(
+    core.getByRole("button", { name: "Practice +40 progress" })
+  ).toBeVisible();
+  expect(
+    Number(await core.getByTestId("core-training-xp").innerText())
+  ).toBeGreaterThanOrEqual(275);
+  expect(
+    Number(await core.getByTestId("core-completed-cycles").innerText())
+  ).toBeGreaterThanOrEqual(11);
+});
+
 test("exposes keyboard activity controls and labelled progress", async ({
   page,
 }) => {
