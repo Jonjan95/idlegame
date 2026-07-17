@@ -4,10 +4,51 @@ import {
   applySteadyRoutineElapsed,
   applyPlayableCoreProgress,
   performPractice,
+  getPlayableCoreGuidance,
   purchaseRefinedTechnique,
   purchaseSteadyRoutine,
 } from "./playableCore";
 import { createDefaultGameState } from "./state";
+
+describe("playable-core guidance", () => {
+  it("points a fresh save to Refined Technique", () => {
+    expect(getPlayableCoreGuidance(createDefaultGameState())).toEqual({
+      stage: "refined_technique",
+      masteryRemaining: 3,
+    });
+  });
+
+  it("counts down remaining Mastery without going negative", () => {
+    const state = createDefaultGameState();
+    state.playableCore.mastery = 2;
+    expect(getPlayableCoreGuidance(state).masteryRemaining).toBe(1);
+
+    state.playableCore.mastery = 5;
+    expect(getPlayableCoreGuidance(state).masteryRemaining).toBe(0);
+  });
+
+  it("points to Steady Routine after the technique is owned", () => {
+    const state = createDefaultGameState();
+    state.playableCore.refinedTechniqueOwned = true;
+    state.playableCore.mastery = 3;
+
+    expect(getPlayableCoreGuidance(state)).toEqual({
+      stage: "steady_routine",
+      masteryRemaining: 5,
+    });
+  });
+
+  it("reports active automation after both unlocks", () => {
+    const state = createDefaultGameState();
+    state.playableCore.refinedTechniqueOwned = true;
+    state.playableCore.steadyRoutineOwned = true;
+
+    expect(getPlayableCoreGuidance(state)).toEqual({
+      stage: "automation_active",
+      masteryRemaining: 0,
+    });
+  });
+});
 
 describe("playable-core progress", () => {
   it("adds the configured progress for one Practice action", () => {

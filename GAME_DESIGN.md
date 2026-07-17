@@ -78,6 +78,17 @@ be preserved unless removing or changing it is explicitly within an issue.
 The milestone should use provisional or theme-neutral terminology internally so
 the experiment can be reskinned or replaced without rewriting the game engine.
 
+## Playtest evidence
+
+On 2026-07-17, the project owner evaluated the implemented foundation and found
+the current groundwork satisfying enough to continue. The playtest did not
+identify a specific mechanic or balance value that should change yet.
+
+That result supports preserving the current loop while improving how clearly it
+communicates the next goal, cycle rewards, upgrade effect, and automation state.
+It is not evidence that the provisional theme or long-term game structure is
+settled.
+
 ## Playable-core contract
 
 The first experiment is a separate dashboard training panel. It does not

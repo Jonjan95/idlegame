@@ -18,6 +18,7 @@ The application currently includes:
 - Visible manual action progress, Training XP, and completed-cycle feedback.
 - One persistent Refined Technique upgrade that improves manual progress.
 - One earned Steady Routine unlock that adds elapsed online automation.
+- Clear next-goal guidance, cycle rewards, and accessible progress indicators.
 - Woodcutting and mining activities.
 - Timed resource generation.
 - Skill XP, levels, and level-progress displays.

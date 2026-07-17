@@ -145,6 +145,15 @@ test("completes and persists the first Practice cycle", async ({ page }) => {
   });
 
   await expect(core.getByTestId("core-mastery")).toHaveText("0");
+  await expect(core.getByTestId("core-guidance")).toContainText(
+    "Refined Technique · 3 Mastery remaining"
+  );
+  await expect(core.getByTestId("practice-strength")).toHaveText(
+    "Manual Practice: +25 progress per press"
+  );
+  await expect(
+    core.getByRole("progressbar", { name: "Training level progress" })
+  ).toHaveAttribute("aria-valuenow", "0");
   await expect(
     core.getByRole("progressbar", { name: "Practice cycle progress" })
   ).toHaveAttribute("aria-valuenow", "0");
@@ -161,6 +170,12 @@ test("completes and persists the first Practice cycle", async ({ page }) => {
   await expect(core.getByTestId("core-mastery")).toHaveText("1");
   await expect(core.getByTestId("core-training-xp")).toHaveText("25");
   await expect(core.getByTestId("core-completed-cycles")).toHaveText("1");
+  await expect(core.getByTestId("core-guidance")).toContainText(
+    "Refined Technique · 2 Mastery remaining"
+  );
+  await expect(page.getByRole("status")).toContainText(
+    "+1 Mastery · +25 Training XP"
+  );
   await expect(
     core.getByRole("progressbar", { name: "Practice cycle progress" })
   ).toHaveAttribute("aria-valuenow", "0");
@@ -197,6 +212,12 @@ test("buys Refined Technique and improves Practice", async ({ page }) => {
   await expect(core.getByTestId("core-completed-cycles")).toHaveText("3");
   await expect(core.getByTestId("refined-technique-owned")).toHaveText(
     "Owned"
+  );
+  await expect(core.getByTestId("core-guidance")).toContainText(
+    "Steady Routine · 8 Mastery remaining"
+  );
+  await expect(core.getByTestId("practice-strength")).toHaveText(
+    "Manual Practice: +40 progress per press"
   );
 
   await core
@@ -250,6 +271,9 @@ test("unlocks Steady Routine and keeps manual Practice", async ({ page }) => {
   await expect(core.getByTestId("steady-routine-owned")).toHaveText(
     "Running"
   );
+  await expect(core.getByTestId("core-guidance")).toContainText(
+    "Automation active · Manual Practice remains available"
+  );
   await expect(progress).not.toHaveAttribute("aria-valuenow", "0");
 
   const beforeManual = Number(await progress.getAttribute("aria-valuenow"));
@@ -267,6 +291,55 @@ test("unlocks Steady Routine and keeps manual Practice", async ({ page }) => {
   await expect(
     core.getByRole("button", { name: "Practice +40 progress" })
   ).toBeVisible();
+});
+
+test("exposes keyboard activity controls and labelled progress", async ({
+  page,
+}) => {
+  await expect(
+    page.getByRole("progressbar", { name: "Training level progress" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("progressbar", { name: "Woodcutting level progress" })
+  ).toBeVisible();
+  await expect(
+    page.getByRole("progressbar", { name: "Mining level progress" })
+  ).toBeVisible();
+
+  const startWoodcutting = page.getByRole("button", {
+    name: "Start Woodcutting",
+  });
+  await startWoodcutting.focus();
+  await startWoodcutting.press("Enter");
+  const stopWoodcutting = page.getByRole("button", {
+    name: "Stop Woodcutting",
+  });
+  await expect(stopWoodcutting).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.getByRole("progressbar", { name: "Woodcutting action progress" })
+  ).toBeVisible();
+
+  await stopWoodcutting.press("Space");
+  await expect(startWoodcutting).toHaveAttribute("aria-pressed", "false");
+
+  const startMining = page.getByRole("button", { name: "Start Mining" });
+  await startMining.focus();
+  await startMining.press("Enter");
+  await expect(
+    page.getByRole("button", { name: "Stop Mining" })
+  ).toHaveAttribute("aria-pressed", "true");
+});
+
+test("keeps the dashboard within a 320px viewport", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.reload();
+
+  await expect(page.getByTestId("playable-core")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
 });
 
 test("migrates a legacy gameplay fixture to the canonical save", async ({

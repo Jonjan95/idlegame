@@ -132,6 +132,10 @@ elapsed online automation defined by the theme-neutral contract in
 time without calculating rewards, affordability, or production in the
 component.
 
+The same module returns a deterministic guidance stage and remaining Mastery
+for the next existing milestone. React maps that structured result to
+player-facing wording; it does not recalculate progression costs.
+
 Manual and automatic progress share the same fractional cycle. Steady Routine
 does not store a last-accounted timestamp, so reload resumes from saved progress
 without treating closed time as automation. Offline training remains a separate
@@ -285,6 +289,10 @@ Components should:
 - Dispatch domain-backed commands.
 - Display progress and feedback.
 - Explain locked and disabled actions.
+- Use semantic controls, labelled progress indicators, and status announcements
+  when gameplay state changes.
+- Keep navigation and core actions usable without horizontal page overflow at
+  narrow widths.
 
 Components should not calculate purchases, rewards, XP awards, or offline
 progress.
