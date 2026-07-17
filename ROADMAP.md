@@ -84,7 +84,8 @@ Perform a meaningful action
 
 #### Testing and final playtest
 
-13. **Add one critical Playwright gameplay flow.**
+13. **Add one critical Playwright gameplay flow.** Completed by an uninterrupted
+    fresh-save journey without developer shortcuts.
 14. **Conduct the milestone playtest and close-out review.**
 
 Each issue must contain context, exact scope, acceptance criteria, automated

@@ -29,9 +29,9 @@ The application currently includes:
 - Deterministic gathering offline progress with an eight-hour cap.
 - Notifications and visible action progress.
 
-The remaining foundation work is primarily the combined playable-loop browser
-test, feedback refinement, and manual evaluation. Multi-tab coordination remains
-a known technical risk outside the active milestone. See
+The remaining foundation work is primarily the milestone close-out review and
+recording the next small design hypothesis. Multi-tab coordination remains a
+known technical risk outside the active milestone. See
 [ARCHITECTURE.md](./ARCHITECTURE.md) and [ROADMAP.md](./ROADMAP.md).
 
 ## Current direction
@@ -101,8 +101,9 @@ npm run preview
 ```
 
 `npm run test` runs deterministic unit tests with Vitest. `npm run test:e2e`
-runs the current Playwright browser smoke test. The critical full gameplay flow
-will be added after the playable core exists.
+runs focused browser regressions plus one uninterrupted fresh-save journey
+through Practice, Refined Technique, Steady Routine, visible automation, manual
+interaction, and reload persistence.
 
 GitHub Actions runs lint, type-checking, unit tests, the production build, and
 the browser smoke test for pull requests and pushes to `main`.
