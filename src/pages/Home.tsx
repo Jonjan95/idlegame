@@ -1,7 +1,10 @@
 import Footer from "../components/Footer";
 import { useGame, SkillName } from "../context/GameContext";
 import { xpToLevel, levelProgressPercent } from "../lib/xp";
-import { PLAYABLE_CORE_CONFIG } from "../game/playableCore";
+import {
+  PLAYABLE_CORE_CONFIG,
+  getPlayableCoreGuidance,
+} from "../game/playableCore";
 
 function formatCycleProgress(progress: number): string {
   return Number.isInteger(progress) ? String(progress) : progress.toFixed(1);
@@ -33,9 +36,12 @@ function SkillCard(props: SkillCardProps) {
   }
 
   return (
-    <div
+    <button
+      type="button"
       onClick={handleClick}
-      className={`cursor-pointer border p-5 transition hover:brightness-110 ${
+      aria-label={`${isActive ? "Stop" : "Start"} ${props.name}`}
+      aria-pressed={isActive}
+      className={`w-full cursor-pointer border p-5 text-left transition hover:brightness-110 ${
         isActive
           ? `border-l-4 ${props.colors.activeBorder} ${props.colors.activeBg}`
           : "border-zinc-700 bg-zinc-900 hover:bg-zinc-800"
@@ -47,7 +53,7 @@ function SkillCard(props: SkillCardProps) {
           <span className="text-base font-semibold text-white">{props.name}</span>
           {isActive && (
             <span className="flex items-center gap-1 border border-white/20 bg-white/5 px-2 py-0.5 text-xs text-white/60">
-              <span className="h-1.5 w-1.5 animate-pulse bg-green-400" />
+              <span className="h-1.5 w-1.5 bg-green-400 motion-safe:animate-pulse" />
               active
             </span>
           )}
@@ -59,7 +65,14 @@ function SkillCard(props: SkillCardProps) {
         </span>
       </div>
 
-      <div className="h-1.5 w-full bg-white/10">
+      <div
+        className="h-1.5 w-full bg-white/10"
+        role="progressbar"
+        aria-label={`${props.name} level progress`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={levelProgressPercent(props.xp)}
+      >
         <div
           className={`h-full transition-all duration-300 ${isActive ? props.colors.bar : "bg-zinc-600"}`}
           style={{ width: `${levelProgressPercent(props.xp)}%` }}
@@ -68,7 +81,14 @@ function SkillCard(props: SkillCardProps) {
 
       {isActive && (
         <div className="mt-3">
-          <div className="h-2 w-full bg-white/10">
+          <div
+            className="h-2 w-full bg-white/10"
+            role="progressbar"
+            aria-label={`${props.name} action progress`}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+          >
             <div
               className={`h-full ${props.colors.actionBar}`}
               style={{ width: `${progress}%`, transition: "width 0.05s linear" }}
@@ -79,7 +99,7 @@ function SkillCard(props: SkillCardProps) {
           </p>
         </div>
       )}
-    </div>
+    </button>
   );
 }
 
@@ -107,6 +127,7 @@ export default function Home() {
   const canAffordRoutine =
     techniqueOwned &&
     state.playableCore.mastery >= PLAYABLE_CORE_CONFIG.steadyRoutineCost;
+  const guidance = getPlayableCoreGuidance(state);
 
   return (
     <main className="flex flex-1 flex-col items-center bg-zinc-950 px-4 py-12 text-white">
@@ -167,6 +188,34 @@ export default function Home() {
             </div>
           </div>
 
+          <div
+            className="mb-4 border-l-2 border-violet-400 bg-violet-950/60 px-3 py-2"
+            data-testid="core-guidance"
+            aria-live="polite"
+          >
+            <p className="font-mono text-xs uppercase tracking-wider text-violet-300/70">
+              {guidance.stage === "automation_active"
+                ? "Current state"
+                : "Next goal"}
+            </p>
+            <p className="mt-1 text-sm font-semibold text-violet-100">
+              {guidance.stage === "refined_technique" &&
+                `Refined Technique · ${
+                  guidance.masteryRemaining === 0
+                    ? "Ready to buy"
+                    : `${guidance.masteryRemaining} Mastery remaining`
+                }`}
+              {guidance.stage === "steady_routine" &&
+                `Steady Routine · ${
+                  guidance.masteryRemaining === 0
+                    ? "Ready to unlock"
+                    : `${guidance.masteryRemaining} Mastery remaining`
+                }`}
+              {guidance.stage === "automation_active" &&
+                "Automation active · Manual Practice remains available"}
+            </p>
+          </div>
+
           <div className="mb-4">
             <div className="mb-1 flex justify-between font-mono text-xs text-white/50">
               <span>Current cycle</span>
@@ -190,9 +239,31 @@ export default function Home() {
                 }}
               />
             </div>
+            <p className="mt-2 font-mono text-xs text-violet-200/70">
+              Complete cycle: +{PLAYABLE_CORE_CONFIG.masteryPerCycle} Mastery
+              {" · +"}
+              {PLAYABLE_CORE_CONFIG.trainingXpPerCycle} Training XP
+            </p>
+            <p
+              className="mt-1 font-mono text-xs text-white/50"
+              data-testid="practice-strength"
+            >
+              Manual Practice: +{practiceProgress} progress per press
+            </p>
           </div>
 
-          <div className="mb-4 h-1.5 w-full bg-white/10">
+          <div className="mb-1 flex justify-between font-mono text-xs text-white/50">
+            <span>Training level progress</span>
+            <span>{Math.floor(trainingLevelProgress)}%</span>
+          </div>
+          <div
+            className="mb-4 h-1.5 w-full bg-white/10"
+            role="progressbar"
+            aria-label="Training level progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={trainingLevelProgress}
+          >
             <div
               className="h-full bg-sky-400 transition-all duration-300"
               style={{ width: `${trainingLevelProgress}%` }}
@@ -249,7 +320,7 @@ export default function Home() {
                   className="flex items-center gap-1.5 border border-sky-700 bg-sky-950 px-2 py-1 font-mono text-xs text-sky-300"
                   data-testid="steady-routine-owned"
                 >
-                  <span className="h-1.5 w-1.5 animate-pulse bg-sky-400" />
+                  <span className="h-1.5 w-1.5 bg-sky-400 motion-safe:animate-pulse" />
                   Running
                 </span>
               ) : (
@@ -320,7 +391,7 @@ export default function Home() {
       </div>
       <Footer />
 
-      <div className="fixed bottom-6 right-6 flex items-center gap-2 z-50">
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
         <button
           onClick={() => addGold(1000)}
           className="border border-yellow-700 bg-yellow-950 px-4 py-2 font-mono text-xs font-bold tracking-wider text-yellow-400 transition-colors hover:bg-yellow-900"

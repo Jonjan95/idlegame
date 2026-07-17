@@ -22,6 +22,16 @@ export interface SteadyRoutinePurchaseResult {
   purchased: boolean;
 }
 
+export type PlayableCoreGuidanceStage =
+  | "refined_technique"
+  | "steady_routine"
+  | "automation_active";
+
+export interface PlayableCoreGuidance {
+  stage: PlayableCoreGuidanceStage;
+  masteryRemaining: number;
+}
+
 function isValidCoreState(state: GameState): boolean {
   const core = state.playableCore;
 
@@ -38,6 +48,40 @@ function isValidCoreState(state: GameState): boolean {
     typeof core.refinedTechniqueOwned === "boolean" &&
     typeof core.steadyRoutineOwned === "boolean"
   );
+}
+
+export function getPlayableCoreGuidance(
+  state: GameState
+): PlayableCoreGuidance {
+  if (!isValidCoreState(state)) {
+    return {
+      stage: "refined_technique",
+      masteryRemaining: PLAYABLE_CORE_CONFIG.refinedTechniqueCost,
+    };
+  }
+
+  if (!state.playableCore.refinedTechniqueOwned) {
+    return {
+      stage: "refined_technique",
+      masteryRemaining: Math.max(
+        PLAYABLE_CORE_CONFIG.refinedTechniqueCost -
+          state.playableCore.mastery,
+        0
+      ),
+    };
+  }
+
+  if (!state.playableCore.steadyRoutineOwned) {
+    return {
+      stage: "steady_routine",
+      masteryRemaining: Math.max(
+        PLAYABLE_CORE_CONFIG.steadyRoutineCost - state.playableCore.mastery,
+        0
+      ),
+    };
+  }
+
+  return { stage: "automation_active", masteryRemaining: 0 };
 }
 
 function applyCompletedCycles(
