@@ -14,11 +14,14 @@ describe("canonical game state", () => {
 
     first.inventory.tree = 5;
     first.tools.bronzeAxe = true;
+    first.playableCore.mastery = 3;
 
     expect(second.inventory).toEqual({});
     expect(second.tools.bronzeAxe).toBe(false);
+    expect(second.playableCore.mastery).toBe(0);
     expect(first.inventory).not.toBe(second.inventory);
     expect(first.tools).not.toBe(second.tools);
+    expect(first.playableCore).not.toBe(second.playableCore);
   });
 
   it("creates a valid versioned save envelope", () => {
@@ -38,6 +41,10 @@ describe("canonical game state", () => {
     save.state.gold = 42;
     save.state.tools.bronzeAxe = true;
     save.state.inventory.tree = 4;
+    save.state.playableCore.mastery = 2;
+    save.state.playableCore.trainingXp = 75;
+    save.state.playableCore.completedCycles = 3;
+    save.state.playableCore.cycleProgress = 50;
     save.selections.woodcutting = "oak";
     save.activeActivity = {
       skill: "woodcutting",
@@ -53,6 +60,8 @@ describe("canonical game state", () => {
     state.gold = -1;
     state.wcXp = Number.NaN;
     state.inventory.tree = 1.5;
+    state.playableCore.trainingXp = -2;
+    state.playableCore.cycleProgress = 100;
 
     expect(validateGameState(state)).toEqual(
       expect.arrayContaining([
@@ -61,6 +70,14 @@ describe("canonical game state", () => {
         {
           path: "state.inventory.tree",
           message: "must be an integer",
+        },
+        {
+          path: "state.playableCore.trainingXp",
+          message: "must not be negative",
+        },
+        {
+          path: "state.playableCore.cycleProgress",
+          message: "must be less than 100",
         },
       ])
     );

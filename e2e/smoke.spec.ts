@@ -94,3 +94,37 @@ test("does not duplicate completed production on immediate reload", async ({
   );
   expect(secondTotal).toBe(firstTotal);
 });
+
+test("completes and persists the first Practice cycle", async ({ page }) => {
+  const core = page.getByTestId("playable-core");
+  const practice = core.getByRole("button", {
+    name: "Practice +25 progress",
+  });
+
+  await expect(core.getByTestId("core-mastery")).toHaveText("0");
+  await expect(
+    core.getByRole("progressbar", { name: "Practice cycle progress" })
+  ).toHaveAttribute("aria-valuenow", "0");
+
+  await practice.click();
+  await expect(
+    core.getByRole("progressbar", { name: "Practice cycle progress" })
+  ).toHaveAttribute("aria-valuenow", "25");
+
+  await practice.click();
+  await practice.click();
+  await practice.click();
+
+  await expect(core.getByTestId("core-mastery")).toHaveText("1");
+  await expect(core.getByTestId("core-training-xp")).toHaveText("25");
+  await expect(core.getByTestId("core-completed-cycles")).toHaveText("1");
+  await expect(
+    core.getByRole("progressbar", { name: "Practice cycle progress" })
+  ).toHaveAttribute("aria-valuenow", "0");
+
+  await page.reload();
+
+  await expect(core.getByTestId("core-mastery")).toHaveText("1");
+  await expect(core.getByTestId("core-training-xp")).toHaveText("25");
+  await expect(core.getByTestId("core-completed-cycles")).toHaveText("1");
+});

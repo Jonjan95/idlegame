@@ -1,8 +1,16 @@
 import { DEFAULT_TOOLS, type Tools } from "../lib/resources";
+import { PLAYABLE_CORE_CONFIG } from "./playableCoreConfig";
 
 export const CURRENT_SAVE_VERSION = 1 as const;
 
 export type SkillName = "woodcutting" | "mining";
+
+export interface PlayableCoreState {
+  mastery: number;
+  trainingXp: number;
+  completedCycles: number;
+  cycleProgress: number;
+}
 
 /**
  * Persistent economy and progression state.
@@ -18,6 +26,7 @@ export interface GameState {
   gold: number;
   tools: Tools;
   inventory: Record<string, number>;
+  playableCore: PlayableCoreState;
 }
 
 export interface ResourceSelections {
@@ -58,6 +67,12 @@ export function createDefaultGameState(): GameState {
     gold: 0,
     tools: { ...DEFAULT_TOOLS },
     inventory: {},
+    playableCore: {
+      mastery: 0,
+      trainingXp: 0,
+      completedCycles: 0,
+      cycleProgress: 0,
+    },
   };
 }
 
@@ -110,7 +125,33 @@ export function validateGameState(state: GameState): StateValidationIssue[] {
     ...validateNonNegativeInteger(state.miningXp, "state.miningXp"),
     ...validateNonNegativeInteger(state.miningOres, "state.miningOres"),
     ...validateNonNegativeInteger(state.gold, "state.gold"),
+    ...validateNonNegativeInteger(
+      state.playableCore.mastery,
+      "state.playableCore.mastery"
+    ),
+    ...validateNonNegativeInteger(
+      state.playableCore.trainingXp,
+      "state.playableCore.trainingXp"
+    ),
+    ...validateNonNegativeInteger(
+      state.playableCore.completedCycles,
+      "state.playableCore.completedCycles"
+    ),
+    ...validateNonNegativeInteger(
+      state.playableCore.cycleProgress,
+      "state.playableCore.cycleProgress"
+    ),
   ];
+
+  if (
+    state.playableCore.cycleProgress >=
+    PLAYABLE_CORE_CONFIG.cycleProgressRequired
+  ) {
+    issues.push({
+      path: "state.playableCore.cycleProgress",
+      message: `must be less than ${PLAYABLE_CORE_CONFIG.cycleProgressRequired}`,
+    });
+  }
 
   for (const [itemId, quantity] of Object.entries(state.inventory)) {
     issues.push(...validateIdentifier(itemId, `state.inventory.${itemId}`));

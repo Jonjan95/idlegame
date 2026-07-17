@@ -24,6 +24,10 @@ import {
   calculateElapsedProduction,
   progressToElapsedMs,
 } from "../game/production";
+import {
+  PLAYABLE_CORE_CONFIG,
+  performPractice,
+} from "../game/playableCore";
 
 export type { GameState, SkillName } from "../game/state";
 
@@ -52,6 +56,7 @@ interface GameContextValue {
   buyTool: (toolId: ToolKey) => void;
   sellItem: (itemId: string, amount: number, goldPer: number) => void;
   addGold: (amount: number) => void;
+  practice: () => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -73,6 +78,15 @@ function readFromStorage(): GameState {
     gold: Number(localStorage.getItem("gold")) || 0,
     tools: JSON.parse(localStorage.getItem("tools") || "null") ?? defaults.tools,
     inventory: JSON.parse(localStorage.getItem("inventory") || "{}"),
+    playableCore: {
+      mastery: Number(localStorage.getItem("playable_core_mastery")) || 0,
+      trainingXp:
+        Number(localStorage.getItem("playable_core_training_xp")) || 0,
+      completedCycles:
+        Number(localStorage.getItem("playable_core_completed_cycles")) || 0,
+      cycleProgress:
+        Number(localStorage.getItem("playable_core_cycle_progress")) || 0,
+    },
   };
 }
 
@@ -84,6 +98,22 @@ function writeToStorage(s: GameState): void {
   localStorage.setItem("gold", String(s.gold));
   localStorage.setItem("tools", JSON.stringify(s.tools));
   localStorage.setItem("inventory", JSON.stringify(s.inventory));
+  localStorage.setItem(
+    "playable_core_mastery",
+    String(s.playableCore.mastery)
+  );
+  localStorage.setItem(
+    "playable_core_training_xp",
+    String(s.playableCore.trainingXp)
+  );
+  localStorage.setItem(
+    "playable_core_completed_cycles",
+    String(s.playableCore.completedCycles)
+  );
+  localStorage.setItem(
+    "playable_core_cycle_progress",
+    String(s.playableCore.cycleProgress)
+  );
 }
 
 let nextToastId = 0;
@@ -91,6 +121,7 @@ let nextToastId = 0;
 export function GameProvider({ children }: { children: ReactNode }) {
   const lastTickAt = useRef<number | null>(null);
   const progressRef = useRef(0);
+  const observedCoreCycles = useRef(0);
   const [state, setState] = useState<GameState>(createDefaultGameState);
   const [activeSkill, setActiveSkill] = useState<SkillName | null>(null);
   const [progress, setProgress] = useState(0);
@@ -154,6 +185,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
 
     setState(final);
+    observedCoreCycles.current = final.playableCore.completedCycles;
     setLoaded(true);
   }, []);
 
@@ -161,6 +193,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (!loaded) return;
     writeToStorage(state);
   }, [state, loaded]);
+
+  useEffect(() => {
+    if (!loaded) return;
+
+    const newlyCompleted =
+      state.playableCore.completedCycles - observedCoreCycles.current;
+    observedCoreCycles.current = state.playableCore.completedCycles;
+
+    if (newlyCompleted > 0) {
+      pushToast(
+        "✦",
+        `+${
+          newlyCompleted * PLAYABLE_CORE_CONFIG.masteryPerCycle
+        } Mastery · +${
+          newlyCompleted * PLAYABLE_CORE_CONFIG.trainingXpPerCycle
+        } Training XP`
+      );
+    }
+  }, [state.playableCore.completedCycles, loaded]);
 
   useEffect(() => {
     if (!activeSkill) return;
@@ -267,10 +318,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setState((s) => grantGold(s, amount));
   }
 
+  function practice() {
+    setState((s) => performPractice(s).state);
+  }
+
   return (
     <GameContext.Provider value={{
       state, activeSkill, progress, selectedTree, selectedRock, toasts, loaded,
       startSkill, stopSkill, selectResource, buyTool, sellItem, addGold,
+      practice,
     }}>
       {children}
     </GameContext.Provider>

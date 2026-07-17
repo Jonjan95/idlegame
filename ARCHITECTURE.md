@@ -16,6 +16,7 @@ the first playable milestone.
 src/
 ├── components/       Shared navigation, footer, and notifications
 ├── context/          React game state, timers, persistence, and commands
+├── game/             Canonical state and deterministic gameplay rules
 ├── lib/              Resource configuration and XP calculations
 ├── pages/            Routed application screens
 ├── App.tsx           Provider, layout, and route definitions
@@ -32,6 +33,7 @@ continue while the player navigates between pages.
 `src/context/GameContext.tsx` currently owns:
 
 - Persistent game state.
+- Playable-core Practice command dispatch and completion feedback.
 - Selected resources and the active skill.
 - The production interval and action progress.
 - Resource and XP awards.
@@ -64,6 +66,8 @@ game-domain modules. Browser timing and persistence coordination remain in
 - `tools` records current prototype ownership flags.
 - Resource selections store stable resource IDs for each activity.
 - Active-activity metadata records the skill, resource ID, and start timestamp.
+- `playableCore` records spendable Mastery, lifetime Training XP and completed
+  cycles, and the current fractional cycle progress.
 
 The module also defines:
 
@@ -110,13 +114,16 @@ Offline rewards remain uncapped, and active progress is not yet stored in the
 versioned save envelope. Those concerns remain assigned to later persistence
 and offline-progress issues.
 
-### Planned playable-core domain
+### Playable-core domain
 
-The theme-neutral contract in `GAME_DESIGN.md` will be implemented as a small
-pure domain module backed by one centralized configuration object. The module
-will own manual action progress, completed-cycle rewards, the single upgrade
-purchase, and elapsed automation calculations. React will dispatch commands and
-render their results rather than contain these rules.
+`src/game/playableCoreConfig.ts` owns the stable IDs and centralized values.
+`src/game/playableCore.ts` applies deterministic Practice progress and
+completed-cycle rewards defined by the theme-neutral contract in
+`GAME_DESIGN.md`. React dispatches the Practice command and renders its result
+without calculating rewards in the component.
+
+The same module will gain the one upgrade purchase and elapsed automation
+calculation in their dedicated follow-up issues.
 
 The experiment uses stable IDs for its action, resource, upgrade, and automation
 unlock. Provisional player-facing names can therefore change after playtesting

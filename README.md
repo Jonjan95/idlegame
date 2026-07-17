@@ -14,6 +14,8 @@ game.
 
 The application currently includes:
 
+- A separate theme-neutral Practice and Mastery experiment on the dashboard.
+- Visible manual action progress, Training XP, and completed-cycle feedback.
 - Woodcutting and mining activities.
 - Timed resource generation.
 - Skill XP, levels, and level-progress displays.
