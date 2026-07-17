@@ -48,6 +48,11 @@ The repository currently models two gathering skills:
 - Later prototype resources can require both a skill level and an owned tool.
 - One activity can remain active and generate offline progress.
 
+Production speed is interpreted through elapsed wall-clock time rather than the
+frequency of browser timer callbacks. Completed items use floor rounding, while
+fractional progress is retained for the active activity. Offline production
+currently has no cap; that limit will be defined by a later milestone issue.
+
 This content is prototype scaffolding. It demonstrates several technical needs,
 but it is not a final theme decision.
 

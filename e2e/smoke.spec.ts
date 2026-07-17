@@ -61,3 +61,36 @@ test("transitions from level lock to tool lock to unlocked", async ({
 
   await expect(page.getByRole("button", { name: /Oak/i })).toBeEnabled();
 });
+
+test("does not duplicate completed production on immediate reload", async ({
+  page,
+}) => {
+  await expect(
+    page.getByRole("heading", { name: "Dashboard" })
+  ).toBeVisible();
+
+  await page.evaluate(() => {
+    localStorage.setItem("active_skill", "woodcutting");
+    localStorage.setItem("active_skill_start", String(Date.now() - 2_600));
+    localStorage.setItem("selected_tree", "tree");
+  });
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Dashboard" })
+  ).toBeVisible();
+
+  const firstTotal = await page.evaluate(() =>
+    Number(localStorage.getItem("wc_logs"))
+  );
+  expect(firstTotal).toBe(1);
+
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Dashboard" })
+  ).toBeVisible();
+
+  const secondTotal = await page.evaluate(() =>
+    Number(localStorage.getItem("wc_logs"))
+  );
+  expect(secondTotal).toBe(firstTotal);
+});
