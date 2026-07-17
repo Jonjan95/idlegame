@@ -17,6 +17,7 @@ The application currently includes:
 - A separate theme-neutral Practice and Mastery experiment on the dashboard.
 - Visible manual action progress, Training XP, and completed-cycle feedback.
 - One persistent Refined Technique upgrade that improves manual progress.
+- One earned Steady Routine unlock that adds elapsed online automation.
 - Woodcutting and mining activities.
 - Timed resource generation.
 - Skill XP, levels, and level-progress displays.

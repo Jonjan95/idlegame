@@ -26,8 +26,10 @@ import {
 } from "../game/production";
 import {
   PLAYABLE_CORE_CONFIG,
+  applySteadyRoutineElapsed,
   performPractice,
   purchaseRefinedTechnique,
+  purchaseSteadyRoutine,
 } from "../game/playableCore";
 
 export type { GameState, SkillName } from "../game/state";
@@ -59,6 +61,7 @@ interface GameContextValue {
   addGold: (amount: number) => void;
   practice: () => void;
   buyRefinedTechnique: () => void;
+  buySteadyRoutine: () => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -90,6 +93,8 @@ function readFromStorage(): GameState {
         Number(localStorage.getItem("playable_core_cycle_progress")) || 0,
       refinedTechniqueOwned:
         localStorage.getItem("playable_core_refined_technique") === "true",
+      steadyRoutineOwned:
+        localStorage.getItem("playable_core_steady_routine") === "true",
     },
   };
 }
@@ -122,6 +127,10 @@ function writeToStorage(s: GameState): void {
     "playable_core_refined_technique",
     String(s.playableCore.refinedTechniqueOwned)
   );
+  localStorage.setItem(
+    "playable_core_steady_routine",
+    String(s.playableCore.steadyRoutineOwned)
+  );
 }
 
 let nextToastId = 0;
@@ -131,6 +140,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const progressRef = useRef(0);
   const observedCoreCycles = useRef(0);
   const observedTechniqueOwned = useRef(false);
+  const observedRoutineOwned = useRef(false);
+  const lastCoreTickAt = useRef<number | null>(null);
   const [state, setState] = useState<GameState>(createDefaultGameState);
   const [activeSkill, setActiveSkill] = useState<SkillName | null>(null);
   const [progress, setProgress] = useState(0);
@@ -197,6 +208,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     observedCoreCycles.current = final.playableCore.completedCycles;
     observedTechniqueOwned.current =
       final.playableCore.refinedTechniqueOwned;
+    observedRoutineOwned.current = final.playableCore.steadyRoutineOwned;
     setLoaded(true);
   }, []);
 
@@ -240,6 +252,41 @@ export function GameProvider({ children }: { children: ReactNode }) {
       );
     }
   }, [state.playableCore.refinedTechniqueOwned, loaded]);
+
+  useEffect(() => {
+    if (!loaded) return;
+
+    const newlyPurchased =
+      state.playableCore.steadyRoutineOwned &&
+      !observedRoutineOwned.current;
+    observedRoutineOwned.current = state.playableCore.steadyRoutineOwned;
+
+    if (newlyPurchased) {
+      pushToast(
+        "◇",
+        `Steady Routine: +${PLAYABLE_CORE_CONFIG.automationProgressPerSecond} progress per second`
+      );
+    }
+  }, [state.playableCore.steadyRoutineOwned, loaded]);
+
+  useEffect(() => {
+    if (!loaded || !state.playableCore.steadyRoutineOwned) return;
+
+    lastCoreTickAt.current = Date.now();
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const previousTickAt = lastCoreTickAt.current ?? now;
+      lastCoreTickAt.current = now;
+      setState((s) =>
+        applySteadyRoutineElapsed(s, now - previousTickAt).state
+      );
+    }, PRODUCTION_BASE_STEP_MS);
+
+    return () => {
+      clearInterval(interval);
+      lastCoreTickAt.current = null;
+    };
+  }, [loaded, state.playableCore.steadyRoutineOwned]);
 
   useEffect(() => {
     if (!activeSkill) return;
@@ -354,12 +401,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setState((s) => purchaseRefinedTechnique(s).state);
   }
 
+  function buySteadyRoutine() {
+    setState((s) => purchaseSteadyRoutine(s).state);
+  }
+
   return (
     <GameContext.Provider value={{
       state, activeSkill, progress, selectedTree, selectedRock, toasts, loaded,
       startSkill, stopSkill, selectResource, buyTool, sellItem, addGold,
       practice,
       buyRefinedTechnique,
+      buySteadyRoutine,
     }}>
       {children}
     </GameContext.Provider>

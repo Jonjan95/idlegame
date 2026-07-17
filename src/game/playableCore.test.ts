@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   PLAYABLE_CORE_CONFIG,
+  applySteadyRoutineElapsed,
   applyPlayableCoreProgress,
   performPractice,
   purchaseRefinedTechnique,
+  purchaseSteadyRoutine,
 } from "./playableCore";
 import { createDefaultGameState } from "./state";
 
@@ -32,6 +34,7 @@ describe("playable-core progress", () => {
       completedCycles: 1,
       cycleProgress: 0,
       refinedTechniqueOwned: false,
+      steadyRoutineOwned: false,
     });
   });
 
@@ -55,6 +58,7 @@ describe("playable-core progress", () => {
       completedCycles: 2,
       cycleProgress: 50,
       refinedTechniqueOwned: false,
+      steadyRoutineOwned: false,
     });
   });
 
@@ -90,6 +94,7 @@ describe("playable-core progress", () => {
       completedCycles: 0,
       cycleProgress: 0,
       refinedTechniqueOwned: false,
+      steadyRoutineOwned: false,
     });
   });
 });
@@ -103,6 +108,7 @@ describe("Refined Technique", () => {
       completedCycles: 3,
       cycleProgress: 0,
       refinedTechniqueOwned: false,
+      steadyRoutineOwned: false,
     };
 
     const result = purchaseRefinedTechnique(state);
@@ -114,6 +120,7 @@ describe("Refined Technique", () => {
       completedCycles: 3,
       cycleProgress: 0,
       refinedTechniqueOwned: true,
+      steadyRoutineOwned: false,
     });
     expect(state.playableCore.mastery).toBe(3);
     expect(state.playableCore.refinedTechniqueOwned).toBe(false);
@@ -151,4 +158,126 @@ describe("Refined Technique", () => {
     expect(state.playableCore.completedCycles).toBe(1);
     expect(state.playableCore.cycleProgress).toBe(20);
   });
+});
+
+describe("Steady Routine", () => {
+  function automationReadyState() {
+    const state = createDefaultGameState();
+    state.playableCore.mastery = 8;
+    state.playableCore.refinedTechniqueOwned = true;
+    return state;
+  }
+
+  it("requires Refined Technique and enough Mastery", () => {
+    const missingTechnique = createDefaultGameState();
+    missingTechnique.playableCore.mastery = 8;
+    expect(purchaseSteadyRoutine(missingTechnique)).toEqual({
+      state: missingTechnique,
+      purchased: false,
+    });
+
+    const insufficient = automationReadyState();
+    insufficient.playableCore.mastery = 7;
+    expect(purchaseSteadyRoutine(insufficient)).toEqual({
+      state: insufficient,
+      purchased: false,
+    });
+  });
+
+  it("purchases once without changing lifetime progression", () => {
+    const state = automationReadyState();
+    state.playableCore.trainingXp = 275;
+    state.playableCore.completedCycles = 11;
+
+    const result = purchaseSteadyRoutine(state);
+
+    expect(result.purchased).toBe(true);
+    expect(result.state.playableCore).toEqual({
+      mastery: 0,
+      trainingXp: 275,
+      completedCycles: 11,
+      cycleProgress: 0,
+      refinedTechniqueOwned: true,
+      steadyRoutineOwned: true,
+    });
+    expect(purchaseSteadyRoutine(result.state)).toEqual({
+      state: result.state,
+      purchased: false,
+    });
+  });
+
+  it("adds exactly 20 progress for one elapsed second", () => {
+    const state = automationReadyState();
+    state.playableCore.steadyRoutineOwned = true;
+
+    const result = applySteadyRoutineElapsed(state, 1000);
+
+    expect(result.completedCycles).toBe(0);
+    expect(result.state.playableCore.cycleProgress).toBe(20);
+  });
+
+  it("completes and rewards one cycle after five seconds", () => {
+    const state = automationReadyState();
+    state.playableCore.mastery = 0;
+    state.playableCore.steadyRoutineOwned = true;
+
+    const result = applySteadyRoutineElapsed(state, 5000);
+
+    expect(result.completedCycles).toBe(1);
+    expect(result.state.playableCore.mastery).toBe(1);
+    expect(result.state.playableCore.trainingXp).toBe(25);
+    expect(result.state.playableCore.completedCycles).toBe(1);
+    expect(result.state.playableCore.cycleProgress).toBe(0);
+  });
+
+  it("is invariant across elapsed-time subdivisions", () => {
+    const once = automationReadyState();
+    once.playableCore.steadyRoutineOwned = true;
+    const singleResult = applySteadyRoutineElapsed(once, 2750).state;
+
+    let divided = automationReadyState();
+    divided.playableCore.steadyRoutineOwned = true;
+    for (let step = 0; step < 11; step += 1) {
+      divided = applySteadyRoutineElapsed(divided, 250).state;
+    }
+
+    expect(divided.playableCore).toEqual(singleResult.playableCore);
+  });
+
+  it("combines fractional elapsed progress with manual Practice", () => {
+    let state = automationReadyState();
+    state.playableCore.steadyRoutineOwned = true;
+
+    state = applySteadyRoutineElapsed(state, 1275).state;
+    expect(state.playableCore.cycleProgress).toBe(25.5);
+
+    state = performPractice(state).state;
+    expect(state.playableCore.cycleProgress).toBe(65.5);
+  });
+
+  it("awards multiple delayed cycles without losing progress", () => {
+    const state = automationReadyState();
+    state.playableCore.mastery = 0;
+    state.playableCore.steadyRoutineOwned = true;
+
+    const result = applySteadyRoutineElapsed(state, 12_750);
+
+    expect(result.completedCycles).toBe(2);
+    expect(result.state.playableCore.mastery).toBe(2);
+    expect(result.state.playableCore.trainingXp).toBe(50);
+    expect(result.state.playableCore.cycleProgress).toBe(55);
+  });
+
+  it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects invalid elapsed time %s",
+    (elapsedMs) => {
+      const state = automationReadyState();
+      state.playableCore.steadyRoutineOwned = true;
+
+      expect(applySteadyRoutineElapsed(state, elapsedMs)).toEqual({
+        state,
+        completedCycles: 0,
+      });
+    }
+  );
 });

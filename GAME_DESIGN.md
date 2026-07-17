@@ -129,9 +129,10 @@ moved into centralized game configuration by the implementation issues:
 | Steady Routine production | 20 progress per second while open |
 
 The upgrade therefore requires twelve base Practice actions from a fresh save.
-After buying it, the player needs eight more completed cycles, normally twenty-
-four upgraded actions, to afford automation. Once unlocked, automation completes
-one cycle every five seconds while the application is open. Fractional progress
+After buying it, the player needs eight more completed cycles, exactly twenty
+upgraded actions when starting from zero progress, to afford automation. Once
+unlocked, automation completes one cycle every five seconds while the
+application is open. Fractional progress
 is shared by manual and automatic production rather than tracked separately.
 
 Training XP should use the existing XP curve so the player also observes a

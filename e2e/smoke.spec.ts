@@ -175,3 +175,51 @@ test("buys Refined Technique and improves Practice", async ({ page }) => {
     core.getByRole("progressbar", { name: "Practice cycle progress" })
   ).toHaveAttribute("aria-valuenow", "40");
 });
+
+test("unlocks Steady Routine and keeps manual Practice", async ({ page }) => {
+  await expect(
+    page.getByRole("heading", { name: "Dashboard" })
+  ).toBeVisible();
+
+  await page.evaluate(() => {
+    localStorage.setItem("playable_core_mastery", "8");
+    localStorage.setItem("playable_core_training_xp", "275");
+    localStorage.setItem("playable_core_completed_cycles", "11");
+    localStorage.setItem("playable_core_cycle_progress", "0");
+    localStorage.setItem("playable_core_refined_technique", "true");
+  });
+  await page.reload();
+
+  const core = page.getByTestId("playable-core");
+  const progress = core.getByRole("progressbar", {
+    name: "Practice cycle progress",
+  });
+
+  await core
+    .getByRole("button", { name: "Unlock for 8 Mastery" })
+    .click();
+
+  await expect(core.getByTestId("core-mastery")).toHaveText("0");
+  await expect(core.getByTestId("core-training-xp")).toHaveText("275");
+  await expect(core.getByTestId("core-completed-cycles")).toHaveText("11");
+  await expect(core.getByTestId("steady-routine-owned")).toHaveText(
+    "Running"
+  );
+  await expect(progress).not.toHaveAttribute("aria-valuenow", "0");
+
+  const beforeManual = Number(await progress.getAttribute("aria-valuenow"));
+  await core
+    .getByRole("button", { name: "Practice +40 progress" })
+    .click();
+  const afterManual = Number(await progress.getAttribute("aria-valuenow"));
+  expect(afterManual - beforeManual).toBeGreaterThanOrEqual(40);
+
+  await page.reload();
+
+  await expect(core.getByTestId("steady-routine-owned")).toHaveText(
+    "Running"
+  );
+  await expect(
+    core.getByRole("button", { name: "Practice +40 progress" })
+  ).toBeVisible();
+});
