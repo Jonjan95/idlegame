@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+} from "react";
 import { TREES, ROCKS, SHOP_TOOLS, ToolKey, Resource } from "../lib/resources";
 import {
   createDefaultGameState,
@@ -12,16 +19,17 @@ import {
   purchaseTool,
   sellInventoryItem,
 } from "../game/economy";
+import {
+  PRODUCTION_BASE_STEP_MS,
+  calculateElapsedProduction,
+  progressToElapsedMs,
+} from "../game/production";
 
 export type { GameState, SkillName } from "../game/state";
 
 function getResource(skill: SkillName, selectedId: string): Resource {
   const list = skill === "woodcutting" ? TREES : ROCKS;
   return list.find((r) => r.id === selectedId) ?? list[0];
-}
-
-function secsPerItem(resource: Resource): number {
-  return (100 / resource.speed) * 0.05;
 }
 
 export interface Toast {
@@ -81,6 +89,8 @@ function writeToStorage(s: GameState): void {
 let nextToastId = 0;
 
 export function GameProvider({ children }: { children: ReactNode }) {
+  const lastTickAt = useRef<number | null>(null);
+  const progressRef = useRef(0);
   const [state, setState] = useState<GameState>(createDefaultGameState);
   const [activeSkill, setActiveSkill] = useState<SkillName | null>(null);
   const [progress, setProgress] = useState(0);
@@ -110,23 +120,35 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (skill && startTime > 0) {
       const resourceId = skill === "woodcutting" ? storedTree : storedRock;
       const resource = getResource(skill, resourceId);
-      const elapsed = (Date.now() - startTime) / 1000;
-      const items = Math.floor(elapsed / secsPerItem(resource));
+      const now = Date.now();
+      const production = calculateElapsedProduction(
+        resource.speed,
+        now - startTime
+      );
       final = awardResource(saved, {
         skill,
         resourceId,
-        quantity: items,
+        quantity: production.completedItems,
         xpPerItem: resource.xpPerItem,
       });
 
       writeToStorage(final);
-      localStorage.setItem("active_skill_start", String(Date.now()));
+      const remainingElapsedMs = progressToElapsedMs(
+        resource.speed,
+        production.progress
+      );
+      localStorage.setItem(
+        "active_skill_start",
+        String(now - remainingElapsedMs)
+      );
       setActiveSkill(skill);
+      setProgress(production.progress);
+      progressRef.current = production.progress;
 
-      if (items > 0) {
+      if (production.completedItems > 0) {
         pushToast(
           skill === "woodcutting" ? "🪵" : "🪨",
-          `+${items} ${resource.name} (offline)`
+          `+${production.completedItems} ${resource.name} (offline)`
         );
       }
     }
@@ -147,26 +169,48 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const { speed, xpPerItem } = resource;
     const itemIcon = activeSkill === "woodcutting" ? "🪵" : "🪨";
 
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        const next = prev + speed;
-        if (next >= 100) {
-          setState((s) =>
-            awardResource(s, {
-              skill: activeSkill,
-              resourceId,
-              quantity: 1,
-              xpPerItem,
-            })
-          );
-          pushToast(itemIcon, `+1 ${resource.name}`);
-          return 0;
-        }
-        return next;
-      });
-    }, 50);
+    lastTickAt.current = Date.now();
 
-    return () => clearInterval(interval);
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const previousTickAt = lastTickAt.current ?? now;
+      lastTickAt.current = now;
+      const production = calculateElapsedProduction(
+        speed,
+        now - previousTickAt,
+        progressRef.current
+      );
+      progressRef.current = production.progress;
+      setProgress(production.progress);
+
+      if (production.completedItems > 0) {
+        setState((s) =>
+          awardResource(s, {
+            skill: activeSkill,
+            resourceId,
+            quantity: production.completedItems,
+            xpPerItem,
+          })
+        );
+        const remainingElapsedMs = progressToElapsedMs(
+          speed,
+          production.progress
+        );
+        localStorage.setItem(
+          "active_skill_start",
+          String(now - remainingElapsedMs)
+        );
+        pushToast(
+          itemIcon,
+          `+${production.completedItems} ${resource.name}`
+        );
+      }
+    }, PRODUCTION_BASE_STEP_MS);
+
+    return () => {
+      clearInterval(interval);
+      lastTickAt.current = null;
+    };
   }, [activeSkill, selectedTree, selectedRock]);
 
   function pushToast(icon: string, text: string) {
@@ -177,6 +221,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   function startSkill(skill: SkillName) {
     setProgress(0);
+    progressRef.current = 0;
     setActiveSkill(skill);
     localStorage.setItem("active_skill", skill);
     localStorage.setItem("active_skill_start", String(Date.now()));
@@ -184,13 +229,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   function stopSkill() {
     setProgress(0);
+    progressRef.current = 0;
     setActiveSkill(null);
+    lastTickAt.current = null;
     localStorage.removeItem("active_skill");
     localStorage.removeItem("active_skill_start");
   }
 
   function selectResource(skill: SkillName, resourceId: string) {
     setProgress(0);
+    progressRef.current = 0;
+    if (activeSkill === skill) {
+      const now = Date.now();
+      lastTickAt.current = now;
+      localStorage.setItem("active_skill_start", String(now));
+    }
     if (skill === "woodcutting") {
       setSelectedTree(resourceId);
       localStorage.setItem("selected_tree", resourceId);

@@ -91,8 +91,24 @@ integer results without changing the input state. `GameContext` coordinates the
 React state update and persistence side effects but delegates these economy
 mutations to the domain module.
 
-Resource unlock rules, elapsed-time production, and offline timing remain
-outside this module and are handled by separate milestone issues.
+Resource unlock rules and elapsed-time production live in their dedicated
+domain modules. Offline limits remain assigned to a later milestone issue.
+
+### Production domain
+
+`src/game/production.ts` converts configured resource speed, elapsed
+milliseconds, and optional starting progress into completed items and remaining
+fractional progress. Active and offline production use this same deterministic
+calculation, so callback frequency no longer determines rewards.
+
+The existing `active_skill_start` key now represents the last accounted
+production boundary. When completed work is awarded, the boundary advances
+while retaining the elapsed time represented by fractional progress. Resource
+changes reset both progress and the boundary.
+
+Offline rewards remain uncapped, and active progress is not yet stored in the
+versioned save envelope. Those concerns remain assigned to later persistence
+and offline-progress issues.
 
 ### Progression domain
 
