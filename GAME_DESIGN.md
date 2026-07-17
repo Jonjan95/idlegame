@@ -14,6 +14,10 @@ IdleGame is intended to become a progression-focused incremental RPG. The player
 should repeatedly make progress, feel meaningful improvements, unlock limited
 automation, and see their capabilities grow over time.
 
+Character progression and training are now the preferred direction for the next
+experiment. Progress should eventually demonstrate what the character has
+become capable of doing, rather than existing only to make numbers increase.
+
 The final theme, story, setting, character structure, and long-term progression
 model are not yet decided.
 
@@ -58,10 +62,10 @@ immediate reload cannot award the capped absence again.
 This content is prototype scaffolding. It demonstrates several technical needs,
 but it is not a final theme decision.
 
-## Active design hypothesis
+## Completed foundation hypothesis
 
-The first playable milestone will test whether this structure produces a clear
-sense of progression:
+The first playable milestone tested whether this structure could produce a
+clear sense of progression:
 
 ```text
 Perform a meaningful action
@@ -72,11 +76,12 @@ Perform a meaningful action
 → observe continued visible progress
 ```
 
-Only one coherent path is required. Existing secondary prototype content should
-be preserved unless removing or changing it is explicitly within an issue.
+The implemented path is the stable baseline for the next experiment. Existing
+secondary prototype content should be preserved unless removing or changing it
+is explicitly within an issue.
 
-The milestone should use provisional or theme-neutral terminology internally so
-the experiment can be reskinned or replaced without rewriting the game engine.
+The milestone used provisional, theme-neutral terminology internally so the
+experiment can be reskinned or replaced without rewriting the game engine.
 
 ## Playtest evidence
 
@@ -88,6 +93,50 @@ That result supports preserving the current loop while improving how clearly it
 communicates the next goal, cycle rewards, upgrade effect, and automation state.
 It is not evidence that the provisional theme or long-term game structure is
 settled.
+
+The owner subsequently approved character progression and training as important
+to the next direction, with a small meaningful objective that demonstrates what
+the character's growth enabled.
+
+## Next design hypothesis: character growth and one trial
+
+### Intended player feeling
+
+Training should build anticipation because the player understands that growing
+capability will enable something concrete. Completing the objective should make
+earlier progress feel purposeful, then provide a clear reason to return to
+training.
+
+### Smallest candidate loop
+
+```text
+Train deliberately
+→ improve one expression of character capability
+→ become ready for one meaningful trial
+→ attempt the trial
+→ visibly observe what the growth enabled
+→ return to training with one new objective
+```
+
+The trial is a design role, not a commitment to a theme or system. It could
+later be expressed as an expedition, climb, ritual, investigation, commission,
+or another bounded challenge. It does not currently imply combat, enemies,
+random loot, equipment, a world map, or a story campaign.
+
+### Boundaries before implementation
+
+The next design issue must specify only:
+
+- Which single capability the trial reads.
+- How readiness is communicated before the attempt.
+- Whether the first outcome is deterministic or contains a limited choice.
+- What visible result proves that training mattered.
+- What one new objective appears after completion.
+- How existing Training XP, Mastery, and automation relate to the experiment
+  without adding another currency by default.
+
+The issue must not implement the trial. It should produce a small contract that
+can be accepted, revised, or rejected before source code changes.
 
 ## Playable-core contract
 
@@ -127,8 +176,8 @@ Press Practice to fill a visible action cycle
 
 ### Provisional economy values
 
-These values are the single design source for the experiment until they are
-moved into centralized game configuration by the implementation issues:
+These values are the recorded design source for the experiment and are mirrored
+in the centralized playable-core configuration:
 
 | Rule | Value |
 | --- | ---: |
@@ -153,11 +202,9 @@ level increase during this path. Mastery is spendable; Training XP and completed
 cycle totals are lifetime statistics and must not decrease when buying an
 upgrade.
 
-These numbers are pacing hypotheses, not evidence that the loop is fun. The
-browser implementation and manual playtest must evaluate whether the first
-upgrade is understandable, whether its effect is noticeable, whether automation
-arrives too early or late, and whether watching automated progress feels
-rewarding.
+These numbers remain pacing hypotheses, not evidence that the loop is fun. Any
+future balance issue must state which playtest observation it addresses and
+repeat the relevant manual evaluation.
 
 ### Follow-up boundaries
 
@@ -208,9 +255,10 @@ Preserving a behavior does not require keeping its current implementation.
 
 These questions are intentionally open:
 
-- What is the central player fantasy?
-- Is the main interaction training, exploration, crafting, combat preparation,
-  discovery, building, or something else?
+- What exact fantasy best expresses character growth through training?
+- What form should the first meaningful trial take?
+- Should its first outcome be fully deterministic or contain one limited choice?
+- What visible change should demonstrate that the character became more capable?
 - Does the game need traditional inventory items?
 - Is currency necessary for the first long-term design?
 - How should RPG identity be expressed: attributes, equipment, skills,

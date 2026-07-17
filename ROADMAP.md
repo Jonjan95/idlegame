@@ -9,7 +9,7 @@ Unvalidated ideas belong in the design questions in `GAME_DESIGN.md`, not in a
 large speculative backlog. New milestone work should be proposed only after the
 playable core has been manually evaluated.
 
-## Active milestone: IdleGame Foundation & Playable Core
+## Completed milestone: IdleGame Foundation & Playable Core
 
 ### Goal
 
@@ -27,20 +27,25 @@ Perform a meaningful action
 → observe continued visible progress
 ```
 
-### Completion criteria
+### Completion record
 
-- The current repository and development workflow are documented.
-- Gameplay rules are deterministic and kept outside React components.
-- Economy and progression values have a single source.
-- A fresh player can complete the target loop without developer shortcuts.
-- Save/load is versioned, validated, and compatible with existing saves.
-- Offline progress does not duplicate online progress and has a documented cap.
-- Unit tests cover resource, XP, upgrade, automation, and offline calculations.
-- One Playwright test covers the critical playable flow.
-- GitHub Actions validates lint, type-check, unit tests, and build.
-- A manual playtest checklist has been completed and its findings recorded.
+- Repository and contribution workflows are documented.
+- Deterministic economy, progression, production, automation, and offline rules
+  live outside React components and use centralized configuration.
+- A normal fresh save can complete the playable loop without developer
+  shortcuts, as proven by the combined Playwright journey.
+- Versioned save/load validates fields, migrates legacy data, and preserves
+  compatibility.
+- Gathering offline progress is deterministic, capped at eight hours, and does
+  not duplicate its accounted reward on reload.
+- Vitest covers resource, XP, upgrade, automation, save, and offline rules.
+- GitHub Actions validates lint, type-check, unit tests, build, and Chromium
+  browser scenarios.
+- The project owner manually evaluated the foundation on 2026-07-17 and found
+  it satisfying enough to continue without requesting a balance or mechanic
+  change.
 
-### Planned issue sequence
+### Completed issue sequence
 
 #### Foundation and documentation
 
@@ -86,14 +91,16 @@ Perform a meaningful action
 
 13. **Add one critical Playwright gameplay flow.** Completed by an uninterrupted
     fresh-save journey without developer shortcuts.
-14. **Conduct the milestone playtest and close-out review.**
+14. **Conduct the milestone playtest and close-out review.** Completed with the
+    evidence and next hypothesis recorded in `GAME_DESIGN.md`.
 
 Each issue must contain context, exact scope, acceptance criteria, automated
 validation, manual playtest steps, excluded work, and documentation changes.
 
 ## Explicitly deferred
 
-The following are not planned for the active milestone:
+The following were not introduced by the completed foundation milestone and are
+not committed by the next design step:
 
 - Prestige.
 - Multiple currencies.
@@ -107,17 +114,28 @@ The following are not planned for the active milestone:
 - Major visual redesign.
 - Migration to Godot, Unity, or another engine.
 
-They may be reconsidered only after the small core loop produces useful
-playtest evidence.
+Any of them requires a separate evidence-based hypothesis before it enters the
+roadmap.
 
-## After the milestone
+## Next controlled design step
 
-The next roadmap decision should be based on:
+The approved direction is to explore character growth through training that
+enables one small meaningful trial:
 
-- Which interaction felt most understandable and rewarding.
-- Whether the upgrade produced a meaningful change.
-- Whether automation arrived at an appropriate time.
-- Which existing prototype systems supported the experience.
-- Which theme or RPG framing best fits the proven loop.
+```text
+Train
+→ improve capability
+→ attempt one trial
+→ observe what growth enabled
+→ return with one new objective
+```
 
-The result may be to expand, revise, or discard the playable hypothesis.
+The only recommended next issue is:
+
+**Specify the first character-growth and trial contract.** Define the intended
+feeling, one capability, readiness communication, one trial outcome, one visible
+payoff, and the relationship to the existing training loop. Produce a design
+contract only; do not implement mechanics or create a follow-on backlog.
+
+Combat, loot, equipment, multiple attributes, additional currencies, a world
+map, story, and the final theme remain undecided and unplanned.
