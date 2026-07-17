@@ -1,6 +1,7 @@
 import Footer from "../components/Footer";
 import { useGame, SkillName } from "../context/GameContext";
 import { xpToLevel, levelProgressPercent } from "../lib/xp";
+import { PLAYABLE_CORE_CONFIG } from "../game/playableCore";
 
 interface SkillCardProps {
   name: string;
@@ -79,8 +80,12 @@ function SkillCard(props: SkillCardProps) {
 }
 
 export default function Home() {
-  const { state, addGold } = useGame();
+  const { state, addGold, practice } = useGame();
   const totalLevel = xpToLevel(state.wcXp) + xpToLevel(state.miningXp);
+  const trainingLevel = xpToLevel(state.playableCore.trainingXp);
+  const trainingLevelProgress = levelProgressPercent(
+    state.playableCore.trainingXp
+  );
 
   return (
     <main className="flex flex-1 flex-col items-center bg-zinc-950 px-4 py-12 text-white">
@@ -93,9 +98,98 @@ export default function Home() {
           </p>
         </div>
 
+        <section
+          className="mb-8 border border-violet-700/70 bg-violet-950/30 p-5"
+          data-testid="playable-core"
+        >
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <p className="font-mono text-xs font-semibold uppercase tracking-widest text-violet-300/70">
+                Playable Core Experiment
+              </p>
+              <h2 className="mt-1 text-xl font-bold">Training</h2>
+              <p className="mt-1 max-w-lg text-sm text-white/50">
+                Practice deliberately, complete cycles, and build lasting
+                mastery. Names and theme are provisional.
+              </p>
+            </div>
+            <div className="border border-violet-700 bg-violet-950 px-3 py-2 text-right">
+              <p className="font-mono text-xs text-violet-300/60">Mastery</p>
+              <p className="font-mono text-xl font-bold text-violet-200">
+                <span data-testid="core-mastery">
+                  {state.playableCore.mastery}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-4 grid grid-cols-2 gap-px bg-violet-900/50 text-sm sm:grid-cols-3">
+            <div className="bg-zinc-950/80 p-3">
+              <p className="font-mono text-xs text-white/40">Training level</p>
+              <p className="mt-1 font-semibold">Level {trainingLevel}</p>
+            </div>
+            <div className="bg-zinc-950/80 p-3">
+              <p className="font-mono text-xs text-white/40">Training XP</p>
+              <p className="mt-1 font-semibold">
+                <span data-testid="core-training-xp">
+                  {state.playableCore.trainingXp}
+                </span>
+              </p>
+            </div>
+            <div className="col-span-2 bg-zinc-950/80 p-3 sm:col-span-1">
+              <p className="font-mono text-xs text-white/40">Cycles completed</p>
+              <p className="mt-1 font-semibold">
+                <span data-testid="core-completed-cycles">
+                  {state.playableCore.completedCycles}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <div className="mb-1 flex justify-between font-mono text-xs text-white/50">
+              <span>Current cycle</span>
+              <span>
+                {state.playableCore.cycleProgress} /{" "}
+                {PLAYABLE_CORE_CONFIG.cycleProgressRequired}
+              </span>
+            </div>
+            <div
+              className="h-3 w-full bg-white/10"
+              role="progressbar"
+              aria-label="Practice cycle progress"
+              aria-valuemin={0}
+              aria-valuemax={PLAYABLE_CORE_CONFIG.cycleProgressRequired}
+              aria-valuenow={state.playableCore.cycleProgress}
+            >
+              <div
+                className="h-full bg-violet-400 transition-all duration-150"
+                style={{
+                  width: `${state.playableCore.cycleProgress}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="mb-4 h-1.5 w-full bg-white/10">
+            <div
+              className="h-full bg-sky-400 transition-all duration-300"
+              style={{ width: `${trainingLevelProgress}%` }}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={practice}
+            className="w-full border border-violet-500 bg-violet-900/60 px-4 py-3 font-mono font-semibold text-violet-100 transition hover:bg-violet-800/70 active:translate-y-px"
+          >
+            Practice +{PLAYABLE_CORE_CONFIG.basePracticeProgress} progress
+          </button>
+        </section>
+
         <section>
           <h2 className="mb-3 font-mono text-xs font-semibold uppercase tracking-widest text-white/30">
-            Skills
+            Prototype Activities
           </h2>
           <div className="grid grid-cols-1 gap-px bg-zinc-700 sm:grid-cols-2">
             <SkillCard
