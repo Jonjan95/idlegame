@@ -27,6 +27,7 @@ import {
 import {
   PLAYABLE_CORE_CONFIG,
   performPractice,
+  purchaseRefinedTechnique,
 } from "../game/playableCore";
 
 export type { GameState, SkillName } from "../game/state";
@@ -57,6 +58,7 @@ interface GameContextValue {
   sellItem: (itemId: string, amount: number, goldPer: number) => void;
   addGold: (amount: number) => void;
   practice: () => void;
+  buyRefinedTechnique: () => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -86,6 +88,8 @@ function readFromStorage(): GameState {
         Number(localStorage.getItem("playable_core_completed_cycles")) || 0,
       cycleProgress:
         Number(localStorage.getItem("playable_core_cycle_progress")) || 0,
+      refinedTechniqueOwned:
+        localStorage.getItem("playable_core_refined_technique") === "true",
     },
   };
 }
@@ -114,6 +118,10 @@ function writeToStorage(s: GameState): void {
     "playable_core_cycle_progress",
     String(s.playableCore.cycleProgress)
   );
+  localStorage.setItem(
+    "playable_core_refined_technique",
+    String(s.playableCore.refinedTechniqueOwned)
+  );
 }
 
 let nextToastId = 0;
@@ -122,6 +130,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const lastTickAt = useRef<number | null>(null);
   const progressRef = useRef(0);
   const observedCoreCycles = useRef(0);
+  const observedTechniqueOwned = useRef(false);
   const [state, setState] = useState<GameState>(createDefaultGameState);
   const [activeSkill, setActiveSkill] = useState<SkillName | null>(null);
   const [progress, setProgress] = useState(0);
@@ -186,6 +195,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     setState(final);
     observedCoreCycles.current = final.playableCore.completedCycles;
+    observedTechniqueOwned.current =
+      final.playableCore.refinedTechniqueOwned;
     setLoaded(true);
   }, []);
 
@@ -212,6 +223,23 @@ export function GameProvider({ children }: { children: ReactNode }) {
       );
     }
   }, [state.playableCore.completedCycles, loaded]);
+
+  useEffect(() => {
+    if (!loaded) return;
+
+    const newlyPurchased =
+      state.playableCore.refinedTechniqueOwned &&
+      !observedTechniqueOwned.current;
+    observedTechniqueOwned.current =
+      state.playableCore.refinedTechniqueOwned;
+
+    if (newlyPurchased) {
+      pushToast(
+        "◆",
+        `Refined Technique: Practice now adds ${PLAYABLE_CORE_CONFIG.upgradedPracticeProgress}`
+      );
+    }
+  }, [state.playableCore.refinedTechniqueOwned, loaded]);
 
   useEffect(() => {
     if (!activeSkill) return;
@@ -322,11 +350,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setState((s) => performPractice(s).state);
   }
 
+  function buyRefinedTechnique() {
+    setState((s) => purchaseRefinedTechnique(s).state);
+  }
+
   return (
     <GameContext.Provider value={{
       state, activeSkill, progress, selectedTree, selectedRock, toasts, loaded,
       startSkill, stopSkill, selectResource, buyTool, sellItem, addGold,
       practice,
+      buyRefinedTechnique,
     }}>
       {children}
     </GameContext.Provider>

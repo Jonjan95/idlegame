@@ -8,6 +8,11 @@ export interface PlayableCoreProgressResult {
   completedCycles: number;
 }
 
+export interface RefinedTechniquePurchaseResult {
+  state: GameState;
+  purchased: boolean;
+}
+
 function isValidCoreState(state: GameState): boolean {
   const core = state.playableCore;
 
@@ -20,7 +25,8 @@ function isValidCoreState(state: GameState): boolean {
     core.completedCycles >= 0 &&
     Number.isSafeInteger(core.cycleProgress) &&
     core.cycleProgress >= 0 &&
-    core.cycleProgress < PLAYABLE_CORE_CONFIG.cycleProgressRequired
+    core.cycleProgress < PLAYABLE_CORE_CONFIG.cycleProgressRequired &&
+    typeof core.refinedTechniqueOwned === "boolean"
   );
 }
 
@@ -69,6 +75,7 @@ export function applyPlayableCoreProgress(
     state: {
       ...state,
       playableCore: {
+        ...state.playableCore,
         mastery,
         trainingXp,
         completedCycles: lifetimeCycles,
@@ -82,6 +89,34 @@ export function applyPlayableCoreProgress(
 export function performPractice(state: GameState): PlayableCoreProgressResult {
   return applyPlayableCoreProgress(
     state,
-    PLAYABLE_CORE_CONFIG.basePracticeProgress
+    state.playableCore.refinedTechniqueOwned
+      ? PLAYABLE_CORE_CONFIG.upgradedPracticeProgress
+      : PLAYABLE_CORE_CONFIG.basePracticeProgress
   );
+}
+
+export function purchaseRefinedTechnique(
+  state: GameState
+): RefinedTechniquePurchaseResult {
+  if (
+    !isValidCoreState(state) ||
+    state.playableCore.refinedTechniqueOwned ||
+    state.playableCore.mastery < PLAYABLE_CORE_CONFIG.refinedTechniqueCost
+  ) {
+    return { state, purchased: false };
+  }
+
+  return {
+    state: {
+      ...state,
+      playableCore: {
+        ...state.playableCore,
+        mastery:
+          state.playableCore.mastery -
+          PLAYABLE_CORE_CONFIG.refinedTechniqueCost,
+        refinedTechniqueOwned: true,
+      },
+    },
+    purchased: true,
+  };
 }

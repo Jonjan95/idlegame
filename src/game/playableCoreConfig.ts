@@ -11,4 +11,6 @@ export const PLAYABLE_CORE_CONFIG = {
   basePracticeProgress: 25,
   masteryPerCycle: 1,
   trainingXpPerCycle: 25,
+  refinedTechniqueCost: 3,
+  upgradedPracticeProgress: 40,
 } as const;

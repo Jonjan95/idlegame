@@ -117,13 +117,14 @@ and offline-progress issues.
 ### Playable-core domain
 
 `src/game/playableCoreConfig.ts` owns the stable IDs and centralized values.
-`src/game/playableCore.ts` applies deterministic Practice progress and
-completed-cycle rewards defined by the theme-neutral contract in
-`GAME_DESIGN.md`. React dispatches the Practice command and renders its result
-without calculating rewards in the component.
+`src/game/playableCore.ts` applies deterministic Practice progress,
+completed-cycle rewards, and the Refined Technique purchase defined by the
+theme-neutral contract in `GAME_DESIGN.md`. React dispatches these commands and
+renders their results without calculating rewards or affordability in the
+component.
 
-The same module will gain the one upgrade purchase and elapsed automation
-calculation in their dedicated follow-up issues.
+The same module will gain elapsed automation calculation in its dedicated
+follow-up issue.
 
 The experiment uses stable IDs for its action, resource, upgrade, and automation
 unlock. Provisional player-facing names can therefore change after playtesting
