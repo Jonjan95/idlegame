@@ -96,8 +96,8 @@ integer results without changing the input state. `GameContext` coordinates the
 React state update and persistence side effects but delegates these economy
 mutations to the domain module.
 
-Resource unlock rules and elapsed-time production live in their dedicated
-domain modules. Offline limits remain assigned to a later milestone issue.
+Resource unlock rules, elapsed-time production, and bounded offline gathering
+live in dedicated domain modules.
 
 ### Production domain
 
@@ -111,8 +111,16 @@ boundary. When completed work is awarded, the boundary advances while retaining
 the elapsed time represented by fractional progress. Resource changes reset
 both progress and the boundary.
 
-Offline gathering rewards remain uncapped. Defining and testing that cap remains
-assigned to the later offline-progress issue.
+`src/game/offlineProgress.ts` applies the centralized eight-hour gathering cap
+before calling the shared production rule. It accepts explicit timestamps and
+returns the accounted duration, retained fractional progress, next accounting
+boundary, cap status, and clock-anomaly status. Future or invalid timestamps
+award nothing. After a capped absence, the next boundary is based on the current
+time and retained fraction, which discards excess elapsed time and prevents an
+immediate reload from paying the cap again.
+
+The cap applies only to the existing woodcutting and mining scaffolding. Steady
+Routine remains online-only until its pacing has been manually evaluated.
 
 ### Playable-core domain
 
@@ -177,7 +185,6 @@ origin storage.
 
 Remaining risks:
 
-- Offline gathering progress is uncapped.
 - Multiple tabs can overwrite or duplicate progress.
 - Recovery data has no player-facing export or restore interface.
 

@@ -3,6 +3,7 @@ import {
   GAME_SAVE_KEY,
   GAME_SAVE_RECOVERY_KEY,
 } from "../src/persistence/gameStorage";
+import { OFFLINE_PROGRESS_CONFIG } from "../src/game/offlineProgress";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -92,6 +93,44 @@ test("does not duplicate completed production on immediate reload", async ({
     page.getByRole("heading", { name: "Dashboard" })
   ).toBeVisible();
 
+  const secondTotal = await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem("idlegame.save")!);
+    return save.state.wcLogs;
+  });
+  expect(secondTotal).toBe(firstTotal);
+});
+
+test("caps legacy offline gathering and does not award the cap twice", async ({
+  page,
+}) => {
+  await expect(
+    page.getByRole("heading", { name: "Dashboard" })
+  ).toBeVisible();
+
+  await page.evaluate((maxElapsedMs) => {
+    localStorage.removeItem("idlegame.save");
+    localStorage.removeItem("idlegame.save.recovery");
+    localStorage.setItem("active_skill", "woodcutting");
+    localStorage.setItem(
+      "active_skill_start",
+      String(Date.now() - maxElapsedMs - 60_000)
+    );
+    localStorage.setItem("selected_tree", "tree");
+  }, OFFLINE_PROGRESS_CONFIG.gatheringMaxElapsedMs);
+  await page.reload();
+
+  const capSummaries = page.getByText(
+    "+11520 Tree (offline; 8h cap applied)"
+  );
+  expect(await capSummaries.count()).toBeGreaterThan(0);
+  await expect(capSummaries.first()).toBeVisible();
+  const firstTotal = await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem("idlegame.save")!);
+    return save.state.wcLogs;
+  });
+  expect(firstTotal).toBe(11_520);
+
+  await page.reload();
   const secondTotal = await page.evaluate(() => {
     const save = JSON.parse(localStorage.getItem("idlegame.save")!);
     return save.state.wcLogs;

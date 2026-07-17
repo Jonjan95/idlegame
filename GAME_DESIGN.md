@@ -51,7 +51,9 @@ The repository currently models two gathering skills:
 Production speed is interpreted through elapsed wall-clock time rather than the
 frequency of browser timer callbacks. Completed items use floor rounding, while
 fractional progress is retained for the active activity. Offline production
-currently has no cap; that limit will be defined by a later milestone issue.
+for an active gathering skill is limited to eight hours per return. Elapsed time
+beyond that cap is discarded after the capped reward is accounted for, so an
+immediate reload cannot award the capped absence again.
 
 This content is prototype scaffolding. It demonstrates several technical needs,
 but it is not a final theme decision.
@@ -157,7 +159,9 @@ The contract is implemented in three small gameplay issues:
    open.
 
 Offline automation, balance expansion, additional upgrades, new currencies,
-and final thematic language remain outside those issues.
+and final thematic language remain outside those issues. Steady Routine remains
+online-only through this milestone so its pacing can be evaluated before any
+closed-time rewards are introduced.
 
 ## Milestone design constraints
 
