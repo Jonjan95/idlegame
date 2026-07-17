@@ -61,11 +61,15 @@ Perform a meaningful action
 #### Playable core
 
 6. **Specify the milestone economy and playable-loop contract.**
-   Select one provisional path, one interaction, one upgrade, and one automation
-   unlock without choosing the final theme.
+   Define the provisional Practice, Mastery, Refined Technique, and Steady
+   Routine path without choosing the final theme.
 7. **Implement the primary interaction and visible resource gain.**
+   Add the shared 100-point cycle, manual Practice action, Mastery reward, and
+   Training XP progression as a separate dashboard experiment.
 8. **Add one production-improving upgrade.**
+   Let Refined Technique improve manual progress using centralized values.
 9. **Add one basic automation unlock.**
+   Let Steady Routine add elapsed online progress to the same cycle.
 
 #### Persistence and offline progress
 

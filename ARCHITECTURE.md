@@ -46,10 +46,10 @@ React presentation concerns.
 ### Static configuration
 
 `src/lib/resources.ts` contains the current resource and tool definitions.
-`src/lib/xp.ts` contains pure XP and level calculations.
-
-Economy values are partly centralized, but timing rules and several mutations
-remain embedded in `GameContext`.
+`src/lib/xp.ts` contains pure XP and level calculations. Resource awards,
+economy mutations, unlock rules, and production calculations now live in pure
+game-domain modules. Browser timing and persistence coordination remain in
+`GameContext`.
 
 ### Canonical game state
 
@@ -110,6 +110,22 @@ Offline rewards remain uncapped, and active progress is not yet stored in the
 versioned save envelope. Those concerns remain assigned to later persistence
 and offline-progress issues.
 
+### Planned playable-core domain
+
+The theme-neutral contract in `GAME_DESIGN.md` will be implemented as a small
+pure domain module backed by one centralized configuration object. The module
+will own manual action progress, completed-cycle rewards, the single upgrade
+purchase, and elapsed automation calculations. React will dispatch commands and
+render their results rather than contain these rules.
+
+The experiment uses stable IDs for its action, resource, upgrade, and automation
+unlock. Provisional player-facing names can therefore change after playtesting
+without changing stored identifiers or calculation APIs.
+
+The experiment will initially use the existing legacy-key persistence adapter.
+New fields must have safe defaults so existing saves still load. Moving all
+state into the versioned save envelope remains a separate persistence issue.
+
 ### Progression domain
 
 `src/game/progression.ts` evaluates the current prototype's centralized resource
@@ -140,12 +156,7 @@ Known risks:
 - No schema version or migration system.
 - JSON values are parsed without validation or recovery.
 - State can contain negative, invalid, or partial values.
-- Offline time is measured from the original activity start rather than the
-  last accounted-for timestamp, which can duplicate production.
-- Changing resources can cause elapsed time to be evaluated using the wrong
-  resource.
 - Offline progress is uncapped.
-- Future timestamps can generate negative rewards.
 - Multiple tabs can overwrite or duplicate progress.
 - Reset currently clears all storage for the origin.
 

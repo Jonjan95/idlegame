@@ -76,6 +76,88 @@ be preserved unless removing or changing it is explicitly within an issue.
 The milestone should use provisional or theme-neutral terminology internally so
 the experiment can be reskinned or replaced without rewriting the game engine.
 
+## Playable-core contract
+
+The first experiment is a separate dashboard training panel. It does not
+replace or extend the woodcutting and mining themes. Those activities remain
+available as prototype scaffolding while this smaller path tests the milestone
+loop directly.
+
+The player-facing terms are intentionally provisional:
+
+- **Practice** is the deliberate central interaction.
+- **Mastery** is the single spendable resource earned from completed cycles.
+- **Training XP** is lifetime progression and is never spent.
+- **Refined Technique** is the one manual-production upgrade.
+- **Steady Routine** is the one automation unlock.
+
+Stable internal IDs should remain separate from those labels:
+
+| Purpose | Stable ID |
+| --- | --- |
+| Manual action | `manual_practice` |
+| Spendable resource | `mastery` |
+| Lifetime progression | `training_xp` |
+| Production upgrade | `refined_technique` |
+| Automation unlock | `steady_routine` |
+
+The exact fresh-save loop is:
+
+```text
+Press Practice to fill a visible action cycle
+→ complete the cycle and gain Mastery plus Training XP
+→ spend Mastery on Refined Technique
+→ observe that each Practice action fills more of the cycle
+→ spend further Mastery on Steady Routine
+→ observe the same cycle continue automatically
+```
+
+### Provisional economy values
+
+These values are the single design source for the experiment until they are
+moved into centralized game configuration by the implementation issues:
+
+| Rule | Value |
+| --- | ---: |
+| Progress required per cycle | 100 |
+| Base progress per Practice action | 25 |
+| Completed-cycle Mastery reward | 1 |
+| Completed-cycle Training XP reward | 25 |
+| Refined Technique cost | 3 Mastery |
+| Upgraded progress per Practice action | 40 |
+| Steady Routine cost | 8 Mastery |
+| Steady Routine production | 20 progress per second while open |
+
+The upgrade therefore requires twelve base Practice actions from a fresh save.
+After buying it, the player needs eight more completed cycles, normally twenty-
+four upgraded actions, to afford automation. Once unlocked, automation completes
+one cycle every five seconds while the application is open. Fractional progress
+is shared by manual and automatic production rather than tracked separately.
+
+Training XP should use the existing XP curve so the player also observes a
+level increase during this path. Mastery is spendable; Training XP and completed
+cycle totals are lifetime statistics and must not decrease when buying an
+upgrade.
+
+These numbers are pacing hypotheses, not evidence that the loop is fun. The
+browser implementation and manual playtest must evaluate whether the first
+upgrade is understandable, whether its effect is noticeable, whether automation
+arrives too early or late, and whether watching automated progress feels
+rewarding.
+
+### Follow-up boundaries
+
+The contract is implemented in three small gameplay issues:
+
+1. Add Practice, its shared progress cycle, Mastery, and Training XP.
+2. Add Refined Technique using the centralized configuration and deterministic
+   purchase rules.
+3. Add Steady Routine using elapsed-time production while the application is
+   open.
+
+Offline automation, balance expansion, additional upgrades, new currencies,
+and final thematic language remain outside those issues.
+
 ## Milestone design constraints
 
 The **IdleGame Foundation & Playable Core** milestone should contain no more
