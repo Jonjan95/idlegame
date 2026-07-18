@@ -140,12 +140,16 @@ The owner manually evaluated the First Trial, found it worked well enough to
 continue, and confirmed that the compacted experiment layout was better. No
 specific pacing, balance, clarity, choice, or reward change was requested.
 
-## Active character foundation
+## Completed character foundation
 
-Issue #39 is the only active character step. It adds one persistent display
+Issue #39 added one persistent display
 name, one compact Character view, and one visible growth marker derived from the
 existing First Trial completion. Its purpose is to test whether existing
 progression feels more personal when it belongs to the same named character.
+
+The owner manually confirmed that the implementation worked as intended. The
+profile, save migration, progression summary, and milestone presentation are
+accepted as a foundation; no deeper character mechanic is active yet.
 
 This step does not approve classes, attributes, equipment, combat, character
 power choices, final artwork, or a larger character-system backlog. Further

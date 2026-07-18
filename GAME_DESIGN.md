@@ -112,6 +112,12 @@ problem was identified that should expand the First Trial itself. This is
 enough evidence to close the bounded experiment, while remaining less than a
 claim that its mechanics or presentation are final.
 
+On 2026-07-18, the owner manually tested the persistent character profile and
+confirmed that it all worked as intended. This accepts naming, persistence, the
+compact Character view, and the visible First Trial growth marker as a stable
+foundation. It does not by itself establish which deeper character mechanics
+would be enjoyable or whether the provisional presentation should be final.
+
 ## Next design hypothesis: character growth and one trial
 
 ### Intended player feeling
@@ -271,9 +277,9 @@ This contract does not include combat, enemies, health, damage, random failure,
 loot, equipment, attributes, locations, a world map, story, repeatable rewards,
 a second trial, another currency, or a final theme.
 
-## Active design hypothesis: persistent character identity
+## Accepted design hypothesis: persistent character identity
 
-The next bounded experiment asks whether naming one persistent character and
+This bounded experiment asked whether naming one persistent character and
 seeing existing growth attached to that identity makes progression feel more
 personal. It does not yet ask the player to choose a class, build, origin,
 attribute, appearance, or combat role.
@@ -293,7 +299,8 @@ trial rules. Stable character data must not depend on the eventual theme.
 
 ### Character identity evaluation
 
-Manual evaluation should ask:
+The foundation passed functional manual evaluation. These questions remain
+useful when choosing or evaluating a deeper character step:
 
 1. Does choosing a name create a stronger attachment to the same progression?
 2. Is Training Level easier to understand as character growth in this view?
