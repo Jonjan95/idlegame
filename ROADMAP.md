@@ -136,10 +136,14 @@ deterministic. The domain rules, versioned completion milestone, dashboard
 presentation, success feedback, and one Level 4 follow-up objective are
 implemented.
 
-The only active step is the contract's manual evaluation. No additional reward
-system, trial, or speculative backlog should be added until the playtest records
-whether the experiment succeeds and whether any weakness is primarily clarity,
-pacing, lack of choice, or lack of reward.
+The owner manually evaluated the First Trial, found it worked well enough to
+continue, and confirmed that the compacted experiment layout was better. No
+specific pacing, balance, clarity, choice, or reward change was requested.
+
+The next controlled step may establish a small persistent character identity
+and show existing progression through it. This does not approve classes,
+attributes, equipment, combat, character power choices, final artwork, or a
+larger character-system backlog.
 
 Combat, loot, equipment, multiple attributes, additional currencies, a world
 map, story, and the final theme remain undecided and unplanned.

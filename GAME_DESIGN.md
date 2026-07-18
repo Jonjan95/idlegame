@@ -105,6 +105,13 @@ experiment phase, the primary action should stay beside the progress it affects
 and related controls may use compact responsive grouping. This is temporary
 testing scaffolding, not a commitment to the final game interface.
 
+After the Practice action was moved beside its progress, the owner confirmed
+that the layout was better and chose to continue toward a more personal
+character experience. No specific pacing, balance, clarity, choice, or reward
+problem was identified that should expand the First Trial itself. This is
+enough evidence to close the bounded experiment, while remaining less than a
+claim that its mechanics or presentation are final.
+
 ## Next design hypothesis: character growth and one trial
 
 ### Intended player feeling
@@ -147,15 +154,15 @@ for review before source code changes.
 
 ## Accepted first-trial contract
 
-This contract has been accepted as the next small experiment. Its deterministic
-rules and compact dashboard presentation are implemented, making it a playable
-candidate for manual evaluation. Its purpose is to test whether the existing
-training loop feels more meaningful when lifetime character growth enables one
-deliberate objective.
+This contract was accepted and implemented as a small experiment. Its
+deterministic rules and compact dashboard presentation were manually evaluated
+and found sufficient to continue toward a more personal character experience.
+Its purpose was to test whether the existing training loop feels more
+meaningful when lifetime character growth enables one deliberate objective.
 
-Implementation and automated coverage do not establish that the experiment is
-clear, satisfying, or worthwhile. Those questions remain open until the project
-owner completes the manual evaluation below.
+That result supports continuing; it does not establish a final interface,
+theme, balance, or complete progression model. The evaluation questions below
+remain useful whenever the experiment is changed.
 
 ### Stable concepts and provisional wording
 
