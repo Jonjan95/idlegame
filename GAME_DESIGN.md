@@ -98,6 +98,13 @@ The owner subsequently approved character progression and training as important
 to the next direction, with a small meaningful objective that demonstrates what
 the character's growth enabled.
 
+On 2026-07-18, the owner found that the First Trial behavior worked well, but
+the experiment page required too much scrolling because the primary Practice
+action sat below the status, objective, and upgrade panels. During this
+experiment phase, the primary action should stay beside the progress it affects
+and related controls may use compact responsive grouping. This is temporary
+testing scaffolding, not a commitment to the final game interface.
+
 ## Next design hypothesis: character growth and one trial
 
 ### Intended player feeling

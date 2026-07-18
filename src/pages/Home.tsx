@@ -264,6 +264,14 @@ export default function Home() {
             </p>
           </div>
 
+          <button
+            type="button"
+            onClick={practice}
+            className="mb-4 w-full border border-violet-500 bg-violet-900/60 px-4 py-3 font-mono font-semibold text-violet-100 transition hover:bg-violet-800/70 active:translate-y-px"
+          >
+            Practice +{practiceProgress} progress
+          </button>
+
           <div className="mb-1 flex justify-between font-mono text-xs text-white/50">
             <span>Training level progress</span>
             <span>{Math.floor(trainingLevelProgress)}%</span>
@@ -407,7 +415,8 @@ export default function Home() {
             )}
           </div>
 
-          <div className="mb-4 border border-zinc-700 bg-zinc-950/70 p-4">
+          <div className="mb-4 grid gap-3 sm:grid-cols-2">
+          <div className="border border-zinc-700 bg-zinc-950/70 p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-semibold">Refined Technique</p>
@@ -443,7 +452,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="mb-4 border border-zinc-700 bg-zinc-950/70 p-4">
+          <div className="border border-zinc-700 bg-zinc-950/70 p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="font-semibold">Steady Routine</p>
@@ -480,14 +489,7 @@ export default function Home() {
               )}
             </div>
           </div>
-
-          <button
-            type="button"
-            onClick={practice}
-            className="w-full border border-violet-500 bg-violet-900/60 px-4 py-3 font-mono font-semibold text-violet-100 transition hover:bg-violet-800/70 active:translate-y-px"
-          >
-            Practice +{practiceProgress} progress
-          </button>
+          </div>
         </section>
 
         <section>
