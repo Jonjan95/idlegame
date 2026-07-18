@@ -38,6 +38,13 @@ import {
 } from "../game/playableCore";
 import { attemptFirstTrial as applyFirstTrialAttempt } from "../game/firstTrial";
 import {
+  getCharacterProgressSummary,
+  normalizeCharacterName,
+  renameCharacter as applyCharacterRename,
+  type CharacterNameResult,
+  type CharacterProgressSummary,
+} from "../game/characterProfile";
+import {
   clearGameStorage,
   loadGameSave,
   saveGameSave,
@@ -58,6 +65,7 @@ export interface Toast {
 
 interface GameContextValue {
   state: GameState;
+  characterProgress: CharacterProgressSummary;
   activeSkill: SkillName | null;
   progress: number;
   selectedTree: string;
@@ -74,6 +82,7 @@ interface GameContextValue {
   buyRefinedTechnique: () => void;
   buySteadyRoutine: () => void;
   attemptFirstTrial: () => void;
+  renameCharacter: (name: string) => CharacterNameResult;
   resetGame: () => void;
 }
 
@@ -402,6 +411,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setState((s) => applyFirstTrialAttempt(s).state);
   }
 
+  function renameCharacter(name: string): CharacterNameResult {
+    const result = normalizeCharacterName(name);
+    if (result.accepted) {
+      setState((s) => applyCharacterRename(s, result.name).state);
+    }
+    return result;
+  }
+
   function resetGame() {
     resetInProgress.current = true;
     lastTickAt.current = null;
@@ -423,12 +440,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   return (
     <GameContext.Provider value={{
-      state, activeSkill, progress, selectedTree, selectedRock, toasts, loaded,
+      state,
+      characterProgress: getCharacterProgressSummary(state),
+      activeSkill, progress, selectedTree, selectedRock, toasts, loaded,
       startSkill, stopSkill, selectResource, buyTool, sellItem, addGold,
       practice,
       buyRefinedTechnique,
       buySteadyRoutine,
       attemptFirstTrial,
+      renameCharacter,
       resetGame,
     }}>
       {children}

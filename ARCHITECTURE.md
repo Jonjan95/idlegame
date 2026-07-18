@@ -149,6 +149,19 @@ The experiment is stored inside the canonical save envelope. Its fields use safe
 defaults during normalization, and its earlier individual keys are covered by
 the legacy migration.
 
+### Character profile domain
+
+`src/game/characterProfile.ts` owns display-name normalization, immutable rename
+commands, and the structured character progression summary. The summary derives
+Training Level from existing Training XP and its visible growth stage from the
+existing First Trial flag. It does not store or award character power.
+
+`GameContext` exposes the profile command and structured summary. The Character
+page renders those results and maps deterministic rejection reasons to feedback;
+it does not validate names, calculate levels, or interpret milestones itself.
+The provisional name limit and neutral default live in centralized character
+profile configuration.
+
 ### First-trial domain
 
 `src/game/firstTrialConfig.ts` owns the stable First Trial IDs and Level 3
@@ -192,18 +205,20 @@ disable resource-selection buttons while a level or tool lock is present.
 ## Persistence today
 
 `src/persistence/gameStorage.ts` stores one JSON document under
-`idlegame.save`. The document contains version 2 `GameSave` state, resource
+`idlegame.save`. The document contains version 3 `GameSave` state, resource
 selections, and active-activity metadata.
 
 On load, the adapter:
 
-1. Parses and normalizes a canonical version 2 save field by field.
-2. Migrates canonical version 1 saves to version 2, defaulting the First Trial
-   completion milestone to incomplete while preserving existing progress.
-3. Preserves malformed or unsupported canonical text under
+1. Parses and normalizes a canonical version 3 save field by field.
+2. Migrates canonical version 2 saves to version 3 with the neutral character
+   profile while preserving First Trial completion and all earlier progress.
+3. Migrates canonical version 1 saves through the same target format, defaulting
+   the First Trial completion milestone to incomplete as required by version 1.
+4. Preserves malformed or unsupported canonical text under
    `idlegame.save.recovery` before starting from safe defaults.
-4. Migrates all known individual legacy keys when no canonical save exists.
-5. Writes the normalized result back as the canonical document.
+5. Migrates all known individual legacy keys when no canonical save exists.
+6. Writes the normalized result back as the canonical document.
 
 Legacy keys are retained as a non-authoritative migration snapshot but are no
 longer updated. Canonical data always takes precedence. Reset removes the

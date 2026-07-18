@@ -271,6 +271,41 @@ This contract does not include combat, enemies, health, damage, random failure,
 loot, equipment, attributes, locations, a world map, story, repeatable rewards,
 a second trial, another currency, or a final theme.
 
+## Active design hypothesis: persistent character identity
+
+The next bounded experiment asks whether naming one persistent character and
+seeing existing growth attached to that identity makes progression feel more
+personal. It does not yet ask the player to choose a class, build, origin,
+attribute, appearance, or combat role.
+
+The smallest character foundation contains:
+
+- One player-chosen display name, with `Trainee` as neutral default wording.
+- One compact Character view using temporary presentation rather than final art.
+- Existing Training Level and lifetime Training XP.
+- A presentation-only state of `Training in progress` or `Trial proven`, derived
+  from the existing First Trial milestone.
+- The existing next objective, without another reward or progression rule.
+
+The name changes identity only. The visible growth state is derived rather than
+stored and has no effect on Practice, rewards, costs, automation, gathering, or
+trial rules. Stable character data must not depend on the eventual theme.
+
+### Character identity evaluation
+
+Manual evaluation should ask:
+
+1. Does choosing a name create a stronger attachment to the same progression?
+2. Is Training Level easier to understand as character growth in this view?
+3. Does the visible change after the First Trial feel like the character earned
+   a persistent milestone?
+4. Does the temporary presentation leave room for a future theme and art style?
+5. What feels missing from the personal connection, without assuming that the
+   answer must be classes, equipment, combat, or a large customization system?
+
+Automated tests verify identity, derivation, migration, and persistence. They
+cannot establish that the character feels personal or rewarding.
+
 ## Playable-core contract
 
 The first experiment is a separate dashboard training panel. It does not

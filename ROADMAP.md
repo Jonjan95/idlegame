@@ -140,10 +140,17 @@ The owner manually evaluated the First Trial, found it worked well enough to
 continue, and confirmed that the compacted experiment layout was better. No
 specific pacing, balance, clarity, choice, or reward change was requested.
 
-The next controlled step may establish a small persistent character identity
-and show existing progression through it. This does not approve classes,
-attributes, equipment, combat, character power choices, final artwork, or a
-larger character-system backlog.
+## Active character foundation
+
+Issue #39 is the only active character step. It adds one persistent display
+name, one compact Character view, and one visible growth marker derived from the
+existing First Trial completion. Its purpose is to test whether existing
+progression feels more personal when it belongs to the same named character.
+
+This step does not approve classes, attributes, equipment, combat, character
+power choices, final artwork, or a larger character-system backlog. Further
+character work waits for its manual evaluation rather than being planned
+speculatively.
 
 Combat, loot, equipment, multiple attributes, additional currencies, a world
 map, story, and the final theme remain undecided and unplanned.

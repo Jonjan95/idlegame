@@ -1,4 +1,8 @@
 import { ROCKS, TREES, type Tools } from "../lib/resources";
+import {
+  normalizeCharacterName,
+  type CharacterProfileState,
+} from "../game/characterProfile";
 import { PLAYABLE_CORE_CONFIG } from "../game/playableCoreConfig";
 import {
   CURRENT_SAVE_VERSION,
@@ -162,11 +166,36 @@ function normalizeInventory(
   return inventory;
 }
 
+function normalizeCharacter(
+  value: unknown,
+  fallback: CharacterProfileState,
+  issues: string[],
+  supported: boolean
+): CharacterProfileState {
+  if (!supported) return { ...fallback };
+  if (!isRecord(value)) {
+    issues.push("state.character used its default");
+    return { ...fallback };
+  }
+
+  const result = normalizeCharacterName(value.name);
+  if (!result.accepted) {
+    issues.push("state.character.name used its default");
+    return { ...fallback };
+  }
+
+  if (result.name !== value.name) {
+    issues.push("state.character.name was normalized");
+  }
+  return { name: result.name };
+}
+
 function normalizeState(
   value: unknown,
   defaults: GameState,
   issues: string[],
-  supportsFirstTrialCompletion = true
+  supportsFirstTrialCompletion = true,
+  supportsCharacterProfile = true
 ): GameState {
   const state = isRecord(value) ? value : {};
   if (!isRecord(value) && value !== undefined) {
@@ -180,6 +209,12 @@ function normalizeState(
   }
 
   return {
+    character: normalizeCharacter(
+      state.character,
+      defaults.character,
+      issues,
+      supportsCharacterProfile
+    ),
     wcXp: normalizeInteger(state.wcXp, defaults.wcXp, "state.wcXp", issues),
     wcLogs: normalizeInteger(
       state.wcLogs,
@@ -330,7 +365,9 @@ export function normalizeGameSave(value: unknown): LoadGameSaveResult {
   const defaults = createDefaultGameSave();
   if (
     !isRecord(value) ||
-    (value.version !== 1 && value.version !== CURRENT_SAVE_VERSION)
+    (value.version !== 1 &&
+      value.version !== 2 &&
+      value.version !== CURRENT_SAVE_VERSION)
   ) {
     return {
       save: defaults,
@@ -347,6 +384,7 @@ export function normalizeGameSave(value: unknown): LoadGameSaveResult {
         value.state,
         defaults.state,
         issues,
+        value.version !== 1,
         value.version === CURRENT_SAVE_VERSION
       ),
       selections: normalizeSelections(
@@ -356,7 +394,8 @@ export function normalizeGameSave(value: unknown): LoadGameSaveResult {
       ),
       activeActivity: normalizeActivity(value.activeActivity, issues),
     },
-    source: value.version === 1 ? "migrated" : "canonical",
+    source:
+      value.version === CURRENT_SAVE_VERSION ? "canonical" : "migrated",
     issues,
   };
 }
@@ -451,7 +490,9 @@ function migrateLegacySave(
           },
         },
         defaults.state,
-        issues
+        issues,
+        false,
+        false
       ),
       selections,
       activeActivity,

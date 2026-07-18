@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 
 const links = [
   { href: "/", label: "Home", icon: "🏠" },
+  { href: "/character", label: "Character", icon: "◆" },
   { href: "/woodcutting", label: "Woodcutting", icon: "🪓" },
   { href: "/mining", label: "Mining", icon: "⛏️" },
   { href: "/inventory", label: "Inventory", icon: "🎒" },

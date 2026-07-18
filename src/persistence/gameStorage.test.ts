@@ -39,9 +39,10 @@ describe("versioned game storage", () => {
     expect(JSON.parse(storage.getItem(GAME_SAVE_KEY)!)).toEqual(result.save);
   });
 
-  it("round trips all canonical version 2 fields", () => {
+  it("round trips all canonical version 3 fields", () => {
     const storage = new MemoryStorage();
     const save = createDefaultGameSave();
+    save.state.character.name = "Mira Stone";
     save.state.wcXp = 250;
     save.state.wcLogs = 10;
     save.state.miningXp = 100;
@@ -109,7 +110,8 @@ describe("versioned game storage", () => {
 
     expect(result.source).toBe("migrated");
     expect(result.issues).toEqual([]);
-    expect(result.save.version).toBe(2);
+    expect(result.save.version).toBe(3);
+    expect(result.save.state.character).toEqual({ name: "Trainee" });
     expect(result.save.state.wcXp).toBe(250);
     expect(result.save.state.gold).toBe(42);
     expect(result.save.state.inventory).toEqual({ tree: 7 });
@@ -132,6 +134,49 @@ describe("versioned game storage", () => {
       startedAt: 1_750_000_000_000,
     });
     expect(JSON.parse(storage.getItem(GAME_SAVE_KEY)!)).toEqual(result.save);
+  });
+
+  it("migrates a canonical version 2 save with its trial progress intact", () => {
+    const storage = new MemoryStorage();
+    const version2 = createDefaultGameSave() as unknown as Record<
+      string,
+      unknown
+    >;
+    version2.version = 2;
+    const state = version2.state as Record<string, unknown>;
+    delete state.character;
+    state.wcXp = 250;
+    state.inventory = { tree: 7 };
+    const playableCore = state.playableCore as Record<string, unknown>;
+    playableCore.trainingXp = 400;
+    playableCore.firstTrialCompleted = true;
+    version2.selections = { woodcutting: "oak", mining: "copper" };
+    version2.activeActivity = {
+      skill: "woodcutting",
+      resourceId: "oak",
+      startedAt: 1_750_000_000_000,
+    };
+    storage.setItem(GAME_SAVE_KEY, JSON.stringify(version2));
+
+    const result = loadGameSave(storage);
+
+    expect(result.source).toBe("migrated");
+    expect(result.issues).toEqual([]);
+    expect(result.save.version).toBe(3);
+    expect(result.save.state.character).toEqual({ name: "Trainee" });
+    expect(result.save.state.wcXp).toBe(250);
+    expect(result.save.state.inventory).toEqual({ tree: 7 });
+    expect(result.save.state.playableCore.trainingXp).toBe(400);
+    expect(result.save.state.playableCore.firstTrialCompleted).toBe(true);
+    expect(result.save.selections).toEqual({
+      woodcutting: "oak",
+      mining: "copper",
+    });
+    expect(result.save.activeActivity).toEqual({
+      skill: "woodcutting",
+      resourceId: "oak",
+      startedAt: 1_750_000_000_000,
+    });
   });
 
   it("migrates every legacy field without removing the legacy snapshot", () => {
@@ -168,6 +213,7 @@ describe("versioned game storage", () => {
 
     expect(result.source).toBe("legacy");
     expect(result.save.state).toEqual({
+      character: { name: "Trainee" },
       wcXp: 250,
       wcLogs: 10,
       miningXp: 100,
@@ -234,6 +280,7 @@ describe("versioned game storage", () => {
     const raw = createDefaultGameSave() as unknown as Record<string, unknown>;
     const state = raw.state as Record<string, unknown>;
     state.wcXp = -1;
+    state.character = { name: " ".repeat(3) };
     state.gold = 42;
     state.tools = { bronzeAxe: true, ironAxe: "yes" };
     state.inventory = { tree: 3, rock: -2 };
@@ -259,6 +306,7 @@ describe("versioned game storage", () => {
     expect(result.source).toBe("canonical");
     expect(result.issues.length).toBeGreaterThan(0);
     expect(result.save.state.wcXp).toBe(0);
+    expect(result.save.state.character).toEqual({ name: "Trainee" });
     expect(result.save.state.gold).toBe(42);
     expect(result.save.state.tools.bronzeAxe).toBe(true);
     expect(result.save.state.tools.ironAxe).toBe(false);

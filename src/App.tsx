@@ -7,6 +7,7 @@ import Woodcutting from "./pages/Woodcutting";
 import Mining from "./pages/Mining";
 import Inventory from "./pages/Inventory";
 import Shop from "./pages/Shop";
+import Character from "./pages/Character";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="/mining" element={<Mining />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/shop" element={<Shop />} />
+          <Route path="/character" element={<Character />} />
         </Routes>
         <Notifications />
       </div>

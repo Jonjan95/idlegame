@@ -20,6 +20,8 @@ The application currently includes:
 - One persistent Refined Technique upgrade that improves manual progress.
 - One earned Steady Routine unlock that adds elapsed online automation.
 - Clear next-goal guidance, cycle rewards, and accessible progress indicators.
+- One deterministic First Trial enabled by Training Level progression.
+- A persistent character profile and character-focused growth summary.
 - Woodcutting and mining activities.
 - Timed resource generation.
 - Skill XP, levels, and level-progress displays.
@@ -30,8 +32,9 @@ The application currently includes:
 - Deterministic gathering offline progress with an eight-hour cap.
 - Notifications and visible action progress.
 
-The next design hypothesis explores character growth through training that
-enables one small meaningful trial. The trial type and final theme remain open.
+The active design hypothesis explores whether a named persistent character and
+a visible record of existing growth make progression feel more personal. The
+character model, final theme, and permanent visual direction remain open.
 Multi-tab coordination remains a known technical risk outside the completed
 foundation milestone. See
 [ARCHITECTURE.md](./ARCHITECTURE.md) and [ROADMAP.md](./ROADMAP.md).
@@ -59,9 +62,10 @@ Perform a meaningful action
 → observe continued progress
 ```
 
-The next experiment will ask whether character training feels more meaningful
-when it enables one concrete objective. It will not begin with a combat system,
-equipment model, world map, story campaign, or speculative feature backlog.
+The First Trial experiment worked well enough to continue. The current
+character experiment adds identity and presents existing progression without
+adding classes, attributes, equipment, combat, a world map, story campaign, or
+a speculative feature backlog.
 
 ## Technology
 
