@@ -149,10 +149,10 @@ The experiment is stored inside the canonical save envelope. Its fields use safe
 defaults during normalization, and its earlier individual keys are covered by
 the legacy migration.
 
-### Proposed first-trial boundary
+### First-trial domain
 
-The First Trial contract in `GAME_DESIGN.md` is not implemented. A future issue
-should keep its rules in a pure domain module that:
+`src/game/firstTrialConfig.ts` owns the stable First Trial IDs and Level 3
+readiness requirement. `src/game/firstTrial.ts` implements pure rules that:
 
 - Reads Training XP and derives Training Level through the existing progression
   rule.
@@ -161,13 +161,13 @@ should keep its rules in a pure domain module that:
 - Rejects duplicate completion without changing state.
 - Does not read the browser clock, React, storage, or presentation labels.
 
-React should render the structured status, dispatch the attempt, and display
-feedback without calculating the Level 3 threshold or mutating progression.
+The attempt changes only the persistent completion flag. It does not spend
+Mastery or Training XP and does not award another resource, item, attribute, or
+upgrade.
 
-Persistence will require one completion flag that defaults safely for older
-saves. Before implementation, the issue must document whether the compatible
-field addition stays in save version 1 or requires a new version and migration.
-No schema change is authorized by the design contract alone.
+React does not consume this module yet. A separate presentation issue should
+render the structured status, dispatch the attempt, and display feedback without
+calculating the Level 3 threshold or mutating progression.
 
 ### Progression domain
 
@@ -191,16 +191,18 @@ disable resource-selection buttons while a level or tool lock is present.
 ## Persistence today
 
 `src/persistence/gameStorage.ts` stores one JSON document under
-`idlegame.save`. The document contains version 1 `GameSave` state, resource
+`idlegame.save`. The document contains version 2 `GameSave` state, resource
 selections, and active-activity metadata.
 
 On load, the adapter:
 
-1. Parses and normalizes a canonical version 1 save field by field.
-2. Preserves malformed or unsupported canonical text under
+1. Parses and normalizes a canonical version 2 save field by field.
+2. Migrates canonical version 1 saves to version 2, defaulting the First Trial
+   completion milestone to incomplete while preserving existing progress.
+3. Preserves malformed or unsupported canonical text under
    `idlegame.save.recovery` before starting from safe defaults.
-3. Migrates all known individual legacy keys when no canonical save exists.
-4. Writes the normalized result back as the canonical document.
+4. Migrates all known individual legacy keys when no canonical save exists.
+5. Writes the normalized result back as the canonical document.
 
 Legacy keys are retained as a non-authoritative migration snapshot but are no
 longer updated. Canonical data always takes precedence. Reset removes the

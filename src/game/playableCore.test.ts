@@ -76,6 +76,7 @@ describe("playable-core progress", () => {
       cycleProgress: 0,
       refinedTechniqueOwned: false,
       steadyRoutineOwned: false,
+      firstTrialCompleted: false,
     });
   });
 
@@ -100,6 +101,7 @@ describe("playable-core progress", () => {
       cycleProgress: 50,
       refinedTechniqueOwned: false,
       steadyRoutineOwned: false,
+      firstTrialCompleted: false,
     });
   });
 
@@ -136,6 +138,7 @@ describe("playable-core progress", () => {
       cycleProgress: 0,
       refinedTechniqueOwned: false,
       steadyRoutineOwned: false,
+      firstTrialCompleted: false,
     });
   });
 });
@@ -150,6 +153,7 @@ describe("Refined Technique", () => {
       cycleProgress: 0,
       refinedTechniqueOwned: false,
       steadyRoutineOwned: false,
+      firstTrialCompleted: false,
     };
 
     const result = purchaseRefinedTechnique(state);
@@ -162,6 +166,7 @@ describe("Refined Technique", () => {
       cycleProgress: 0,
       refinedTechniqueOwned: true,
       steadyRoutineOwned: false,
+      firstTrialCompleted: false,
     });
     expect(state.playableCore.mastery).toBe(3);
     expect(state.playableCore.refinedTechniqueOwned).toBe(false);
@@ -240,6 +245,7 @@ describe("Steady Routine", () => {
       cycleProgress: 0,
       refinedTechniqueOwned: true,
       steadyRoutineOwned: true,
+      firstTrialCompleted: false,
     });
     expect(purchaseSteadyRoutine(result.state)).toEqual({
       state: result.state,

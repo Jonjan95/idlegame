@@ -17,12 +17,14 @@ describe("canonical game state", () => {
     first.playableCore.mastery = 3;
     first.playableCore.refinedTechniqueOwned = true;
     first.playableCore.steadyRoutineOwned = true;
+    first.playableCore.firstTrialCompleted = true;
 
     expect(second.inventory).toEqual({});
     expect(second.tools.bronzeAxe).toBe(false);
     expect(second.playableCore.mastery).toBe(0);
     expect(second.playableCore.refinedTechniqueOwned).toBe(false);
     expect(second.playableCore.steadyRoutineOwned).toBe(false);
+    expect(second.playableCore.firstTrialCompleted).toBe(false);
     expect(first.inventory).not.toBe(second.inventory);
     expect(first.tools).not.toBe(second.tools);
     expect(first.playableCore).not.toBe(second.playableCore);
@@ -51,6 +53,7 @@ describe("canonical game state", () => {
     save.state.playableCore.cycleProgress = 50;
     save.state.playableCore.refinedTechniqueOwned = true;
     save.state.playableCore.steadyRoutineOwned = true;
+    save.state.playableCore.firstTrialCompleted = true;
     save.selections.woodcutting = "oak";
     save.activeActivity = {
       skill: "woodcutting",
@@ -77,6 +80,7 @@ describe("canonical game state", () => {
     state.playableCore.cycleProgress = 100;
     Object.assign(state.playableCore, { refinedTechniqueOwned: "yes" });
     Object.assign(state.playableCore, { steadyRoutineOwned: "yes" });
+    Object.assign(state.playableCore, { firstTrialCompleted: "yes" });
 
     expect(validateGameState(state)).toEqual(
       expect.arrayContaining([
@@ -100,6 +104,10 @@ describe("canonical game state", () => {
         },
         {
           path: "state.playableCore.steadyRoutineOwned",
+          message: "must be a boolean",
+        },
+        {
+          path: "state.playableCore.firstTrialCompleted",
           message: "must be a boolean",
         },
       ])

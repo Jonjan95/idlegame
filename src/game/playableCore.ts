@@ -46,7 +46,8 @@ function isValidCoreState(state: GameState): boolean {
     core.cycleProgress >= 0 &&
     core.cycleProgress < PLAYABLE_CORE_CONFIG.cycleProgressRequired &&
     typeof core.refinedTechniqueOwned === "boolean" &&
-    typeof core.steadyRoutineOwned === "boolean"
+    typeof core.steadyRoutineOwned === "boolean" &&
+    typeof core.firstTrialCompleted === "boolean"
   );
 }
 

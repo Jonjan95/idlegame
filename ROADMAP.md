@@ -117,7 +117,7 @@ not committed by the next design step:
 Any of them requires a separate evidence-based hypothesis before it enters the
 roadmap.
 
-## Active design issue
+## First Trial experiment
 
 The approved direction is to explore character growth through training that
 enables one small meaningful trial:
@@ -130,17 +130,15 @@ Train
 → return with one new objective
 ```
 
-The single active issue is:
+The design contract is accepted. Training Level is the sole readiness
+capability, Level 3 is the provisional threshold, and the one-time outcome is
+deterministic. The first implementation step adds the pure locked, ready, and
+completed rules plus a versioned persistent completion milestone. It adds no
+player-facing mechanic by itself.
 
-**Specify the first character-growth and trial contract.** Define the intended
-feeling, one capability, readiness communication, one trial outcome, one visible
-payoff, and the relationship to the existing training loop. Produce a design
-contract only; do not implement mechanics or create a follow-on backlog.
-
-The proposed contract uses existing Training Level as the sole readiness
-capability, with a provisional Level 3 threshold and deterministic one-time
-completion. No implementation issue should be created until that contract is
-reviewed and accepted.
+The next controlled step should present that existing domain status and attempt
+command in the dashboard, then perform the contract's manual evaluation. It
+must not add another reward system, trial, or speculative backlog.
 
 Combat, loot, equipment, multiple attributes, additional currencies, a world
 map, story, and the final theme remain undecided and unplanned.
