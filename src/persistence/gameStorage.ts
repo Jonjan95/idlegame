@@ -41,6 +41,7 @@ export interface StorageLike {
 
 export type GameSaveSource =
   | "canonical"
+  | "migrated"
   | "legacy"
   | "default"
   | "recovered";
@@ -164,7 +165,8 @@ function normalizeInventory(
 function normalizeState(
   value: unknown,
   defaults: GameState,
-  issues: string[]
+  issues: string[],
+  supportsFirstTrialCompletion = true
 ): GameState {
   const state = isRecord(value) ? value : {};
   if (!isRecord(value) && value !== undefined) {
@@ -235,6 +237,14 @@ function normalizeState(
         playableCore.steadyRoutineOwned,
         defaults.playableCore.steadyRoutineOwned,
         "state.playableCore.steadyRoutineOwned",
+        issues
+      ),
+      firstTrialCompleted: normalizeBoolean(
+        supportsFirstTrialCompletion
+          ? playableCore.firstTrialCompleted
+          : undefined,
+        defaults.playableCore.firstTrialCompleted,
+        "state.playableCore.firstTrialCompleted",
         issues
       ),
     },
@@ -318,7 +328,10 @@ function normalizeActivity(
 
 export function normalizeGameSave(value: unknown): LoadGameSaveResult {
   const defaults = createDefaultGameSave();
-  if (!isRecord(value) || value.version !== CURRENT_SAVE_VERSION) {
+  if (
+    !isRecord(value) ||
+    (value.version !== 1 && value.version !== CURRENT_SAVE_VERSION)
+  ) {
     return {
       save: defaults,
       source: "recovered",
@@ -330,7 +343,12 @@ export function normalizeGameSave(value: unknown): LoadGameSaveResult {
   return {
     save: {
       version: CURRENT_SAVE_VERSION,
-      state: normalizeState(value.state, defaults.state, issues),
+      state: normalizeState(
+        value.state,
+        defaults.state,
+        issues,
+        value.version === CURRENT_SAVE_VERSION
+      ),
       selections: normalizeSelections(
         value.selections,
         defaults.selections,
@@ -338,7 +356,7 @@ export function normalizeGameSave(value: unknown): LoadGameSaveResult {
       ),
       activeActivity: normalizeActivity(value.activeActivity, issues),
     },
-    source: "canonical",
+    source: value.version === 1 ? "migrated" : "canonical",
     issues,
   };
 }

@@ -39,7 +39,7 @@ describe("versioned game storage", () => {
     expect(JSON.parse(storage.getItem(GAME_SAVE_KEY)!)).toEqual(result.save);
   });
 
-  it("round trips all canonical version 1 fields", () => {
+  it("round trips all canonical version 2 fields", () => {
     const storage = new MemoryStorage();
     const save = createDefaultGameSave();
     save.state.wcXp = 250;
@@ -56,6 +56,7 @@ describe("versioned game storage", () => {
       cycleProgress: 25.5,
       refinedTechniqueOwned: true,
       steadyRoutineOwned: true,
+      firstTrialCompleted: true,
     };
     save.selections = { woodcutting: "oak", mining: "copper" };
     save.activeActivity = {
@@ -70,6 +71,67 @@ describe("versioned game storage", () => {
     expect(result.source).toBe("canonical");
     expect(result.issues).toEqual([]);
     expect(result.save).toEqual(save);
+  });
+
+  it("migrates a canonical version 1 save without losing progress", () => {
+    const storage = new MemoryStorage();
+    const version1 = createDefaultGameSave() as unknown as Record<
+      string,
+      unknown
+    >;
+    version1.version = 1;
+    const state = version1.state as Record<string, unknown>;
+    state.wcXp = 250;
+    state.gold = 42;
+    state.inventory = { tree: 7 };
+    state.tools = {
+      bronzeAxe: true,
+      ironAxe: false,
+      bronzePickaxe: false,
+      ironPickaxe: false,
+    };
+    const playableCore = state.playableCore as Record<string, unknown>;
+    playableCore.mastery = 5;
+    playableCore.trainingXp = 400;
+    playableCore.completedCycles = 16;
+    playableCore.refinedTechniqueOwned = true;
+    playableCore.steadyRoutineOwned = true;
+    playableCore.firstTrialCompleted = true;
+    version1.selections = { woodcutting: "oak", mining: "copper" };
+    version1.activeActivity = {
+      skill: "woodcutting",
+      resourceId: "oak",
+      startedAt: 1_750_000_000_000,
+    };
+    storage.setItem(GAME_SAVE_KEY, JSON.stringify(version1));
+
+    const result = loadGameSave(storage);
+
+    expect(result.source).toBe("migrated");
+    expect(result.issues).toEqual([]);
+    expect(result.save.version).toBe(2);
+    expect(result.save.state.wcXp).toBe(250);
+    expect(result.save.state.gold).toBe(42);
+    expect(result.save.state.inventory).toEqual({ tree: 7 });
+    expect(result.save.state.tools.bronzeAxe).toBe(true);
+    expect(result.save.state.playableCore).toMatchObject({
+      mastery: 5,
+      trainingXp: 400,
+      completedCycles: 16,
+      refinedTechniqueOwned: true,
+      steadyRoutineOwned: true,
+      firstTrialCompleted: false,
+    });
+    expect(result.save.selections).toEqual({
+      woodcutting: "oak",
+      mining: "copper",
+    });
+    expect(result.save.activeActivity).toEqual({
+      skill: "woodcutting",
+      resourceId: "oak",
+      startedAt: 1_750_000_000_000,
+    });
+    expect(JSON.parse(storage.getItem(GAME_SAVE_KEY)!)).toEqual(result.save);
   });
 
   it("migrates every legacy field without removing the legacy snapshot", () => {
@@ -125,6 +187,7 @@ describe("versioned game storage", () => {
         cycleProgress: 25.5,
         refinedTechniqueOwned: true,
         steadyRoutineOwned: true,
+        firstTrialCompleted: false,
       },
     });
     expect(result.save.selections).toEqual({
@@ -181,6 +244,7 @@ describe("versioned game storage", () => {
       cycleProgress: 100,
       refinedTechniqueOwned: true,
       steadyRoutineOwned: "yes",
+      firstTrialCompleted: "yes",
     };
     raw.selections = { woodcutting: "oak", mining: "unknown" };
     raw.activeActivity = {
@@ -205,6 +269,7 @@ describe("versioned game storage", () => {
     expect(result.save.state.playableCore.cycleProgress).toBe(0);
     expect(result.save.state.playableCore.refinedTechniqueOwned).toBe(true);
     expect(result.save.state.playableCore.steadyRoutineOwned).toBe(false);
+    expect(result.save.state.playableCore.firstTrialCompleted).toBe(false);
     expect(result.save.selections).toEqual({
       woodcutting: "oak",
       mining: "rock",

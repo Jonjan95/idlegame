@@ -1,7 +1,7 @@
 import { DEFAULT_TOOLS, type Tools } from "../lib/resources";
 import { PLAYABLE_CORE_CONFIG } from "./playableCoreConfig";
 
-export const CURRENT_SAVE_VERSION = 1 as const;
+export const CURRENT_SAVE_VERSION = 2 as const;
 
 export type SkillName = "woodcutting" | "mining";
 
@@ -12,6 +12,7 @@ export interface PlayableCoreState {
   cycleProgress: number;
   refinedTechniqueOwned: boolean;
   steadyRoutineOwned: boolean;
+  firstTrialCompleted: boolean;
 }
 
 /**
@@ -76,6 +77,7 @@ export function createDefaultGameState(): GameState {
       cycleProgress: 0,
       refinedTechniqueOwned: false,
       steadyRoutineOwned: false,
+      firstTrialCompleted: false,
     },
   };
 }
@@ -180,6 +182,13 @@ export function validateGameState(state: GameState): StateValidationIssue[] {
   if (typeof state.playableCore.steadyRoutineOwned !== "boolean") {
     issues.push({
       path: "state.playableCore.steadyRoutineOwned",
+      message: "must be a boolean",
+    });
+  }
+
+  if (typeof state.playableCore.firstTrialCompleted !== "boolean") {
+    issues.push({
+      path: "state.playableCore.firstTrialCompleted",
       message: "must be a boolean",
     });
   }

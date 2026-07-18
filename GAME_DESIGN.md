@@ -123,9 +123,9 @@ later be expressed as an expedition, climb, ritual, investigation, commission,
 or another bounded challenge. It does not currently imply combat, enemies,
 random loot, equipment, a world map, or a story campaign.
 
-### Boundaries before implementation
+### Contract review boundaries
 
-The next design issue must specify only:
+The accepted design issue specified only:
 
 - Which single capability the trial reads.
 - How readiness is communicated before the attempt.
@@ -135,14 +135,16 @@ The next design issue must specify only:
 - How existing Training XP, Mastery, and automation relate to the experiment
   without adding another currency by default.
 
-The issue must not implement the trial. It should produce a small contract that
-can be accepted, revised, or rejected before source code changes.
+That design issue did not implement the trial. It produced this small contract
+for review before source code changes.
 
-## Proposed first-trial contract
+## Accepted first-trial contract
 
-This contract is ready for design review but is not implemented. Its purpose is
-to test whether the existing training loop feels more meaningful when lifetime
-character growth enables one deliberate objective.
+This contract has been accepted as the next small experiment. Its deterministic
+status, attempt, and persistence rules are implemented, but it is not yet
+presented in the UI and therefore is not yet a playable mechanic. Its purpose
+is to test whether the existing training loop feels more meaningful when
+lifetime character growth enables one deliberate objective.
 
 ### Stable concepts and provisional wording
 
@@ -213,16 +215,16 @@ The existing Practice button and Steady Routine continue operating after
 completion. The milestone supplements the current loop; it does not replace or
 reset it.
 
-### Persistence expectation
+### Persistence
 
-A future implementation will need one persistent completion flag with a safe
-default of `false`. Saves created before that field exists must load without
-losing any current progression, and missing data must normalize to incomplete.
-The implementation issue must document whether this compatible addition remains
-within the current save version or requires a versioned migration before it is
-written.
+The deterministic foundation stores one `firstTrialCompleted` flag with a safe
+default of `false`. Adding the field increments the canonical save format from
+version 1 to version 2, following the architecture rule that format changes are
+versioned. Version 1 saves migrate field by field without losing existing
+progression, selections, inventory, tools, or active gathering state.
 
-No save field or migration is introduced by this contract.
+The flag has no player-facing effect until a separate presentation issue wires
+the domain status and attempt command into React.
 
 ### Manual evaluation questions
 

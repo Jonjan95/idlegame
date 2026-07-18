@@ -4,6 +4,7 @@ import {
   GAME_SAVE_RECOVERY_KEY,
 } from "../src/persistence/gameStorage";
 import { OFFLINE_PROGRESS_CONFIG } from "../src/game/offlineProgress";
+import { CURRENT_SAVE_VERSION } from "../src/game/state";
 
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
@@ -486,7 +487,7 @@ test("migrates a legacy gameplay fixture to the canonical save", async ({
     };
   }, GAME_SAVE_KEY);
   expect(migrated).toEqual({
-    version: 1,
+    version: CURRENT_SAVE_VERSION,
     wcXp: 100,
     gold: 42,
     legacyXp: "100",
@@ -593,7 +594,7 @@ test("wipes a progressed save while game loops are active", async ({ page }) => 
     legacyXp: null,
     recovery: null,
     save: {
-      version: 1,
+      version: CURRENT_SAVE_VERSION,
       state: {
         wcXp: 0,
         wcLogs: 0,
@@ -614,6 +615,7 @@ test("wipes a progressed save while game loops are active", async ({ page }) => 
           cycleProgress: 0,
           refinedTechniqueOwned: false,
           steadyRoutineOwned: false,
+          firstTrialCompleted: false,
         },
       },
       selections: {
