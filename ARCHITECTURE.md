@@ -165,9 +165,10 @@ The attempt changes only the persistent completion flag. It does not spend
 Mastery or Training XP and does not award another resource, item, attribute, or
 upgrade.
 
-React does not consume this module yet. A separate presentation issue should
-render the structured status, dispatch the attempt, and display feedback without
-calculating the Level 3 threshold or mutating progression.
+`GameContext` exposes the domain attempt as a command and announces the one-time
+completion through the shared notification adapter. The dashboard renders the
+structured status, level and XP requirements, and the centralized Level 4
+follow-up objective without calculating readiness or mutating progression.
 
 ### Progression domain
 
@@ -349,6 +350,9 @@ interaction
 → improved production
 → automation unlock
 → visible progress
+→ reach First Trial readiness
+→ deliberately complete the trial
+→ observe the follow-up objective
 → reload persistence
 ```
 

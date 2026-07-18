@@ -8,8 +8,10 @@ export const FIRST_TRIAL_IDS = {
 } as const;
 
 const requiredTrainingLevel = 3;
+const followUpTrainingLevel = 4;
 
 export const FIRST_TRIAL_CONFIG = {
   requiredTrainingLevel,
   requiredTrainingXp: xpForLevel(requiredTrainingLevel),
+  followUpTrainingLevel,
 } as const;

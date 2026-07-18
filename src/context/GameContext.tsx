@@ -36,6 +36,7 @@ import {
   purchaseRefinedTechnique,
   purchaseSteadyRoutine,
 } from "../game/playableCore";
+import { attemptFirstTrial as applyFirstTrialAttempt } from "../game/firstTrial";
 import {
   clearGameStorage,
   loadGameSave,
@@ -72,6 +73,7 @@ interface GameContextValue {
   practice: () => void;
   buyRefinedTechnique: () => void;
   buySteadyRoutine: () => void;
+  attemptFirstTrial: () => void;
   resetGame: () => void;
 }
 
@@ -92,6 +94,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const observedCoreCycles = useRef(0);
   const observedTechniqueOwned = useRef(false);
   const observedRoutineOwned = useRef(false);
+  const observedFirstTrialCompleted = useRef(false);
   const lastCoreTickAt = useRef<number | null>(null);
   const activeActivityStartedAt = useRef<number | null>(null);
   const [state, setState] = useState<GameState>(createDefaultGameState);
@@ -164,6 +167,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
     observedTechniqueOwned.current =
       final.playableCore.refinedTechniqueOwned;
     observedRoutineOwned.current = final.playableCore.steadyRoutineOwned;
+    observedFirstTrialCompleted.current =
+      final.playableCore.firstTrialCompleted;
     setLoaded(true);
   }, []);
 
@@ -242,6 +247,23 @@ export function GameProvider({ children }: { children: ReactNode }) {
       );
     }
   }, [state.playableCore.steadyRoutineOwned, loaded]);
+
+  useEffect(() => {
+    if (!loaded) return;
+
+    const newlyCompleted =
+      state.playableCore.firstTrialCompleted &&
+      !observedFirstTrialCompleted.current;
+    observedFirstTrialCompleted.current =
+      state.playableCore.firstTrialCompleted;
+
+    if (newlyCompleted) {
+      pushToast(
+        "★",
+        "First Trial completed · Your training enabled this milestone"
+      );
+    }
+  }, [state.playableCore.firstTrialCompleted, loaded]);
 
   useEffect(() => {
     if (!loaded || !state.playableCore.steadyRoutineOwned) return;
@@ -376,6 +398,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
     setState((s) => purchaseSteadyRoutine(s).state);
   }
 
+  function attemptFirstTrial() {
+    setState((s) => applyFirstTrialAttempt(s).state);
+  }
+
   function resetGame() {
     resetInProgress.current = true;
     lastTickAt.current = null;
@@ -402,6 +428,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       practice,
       buyRefinedTechnique,
       buySteadyRoutine,
+      attemptFirstTrial,
       resetGame,
     }}>
       {children}

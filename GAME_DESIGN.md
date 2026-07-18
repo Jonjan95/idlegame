@@ -141,10 +141,14 @@ for review before source code changes.
 ## Accepted first-trial contract
 
 This contract has been accepted as the next small experiment. Its deterministic
-status, attempt, and persistence rules are implemented, but it is not yet
-presented in the UI and therefore is not yet a playable mechanic. Its purpose
-is to test whether the existing training loop feels more meaningful when
-lifetime character growth enables one deliberate objective.
+rules and compact dashboard presentation are implemented, making it a playable
+candidate for manual evaluation. Its purpose is to test whether the existing
+training loop feels more meaningful when lifetime character growth enables one
+deliberate objective.
+
+Implementation and automated coverage do not establish that the experiment is
+clear, satisfying, or worthwhile. Those questions remain open until the project
+owner completes the manual evaluation below.
 
 ### Stable concepts and provisional wording
 
@@ -223,8 +227,8 @@ version 1 to version 2, following the architecture rule that format changes are
 versioned. Version 1 saves migrate field by field without losing existing
 progression, selections, inventory, tools, or active gathering state.
 
-The flag has no player-facing effect until a separate presentation issue wires
-the domain status and attempt command into React.
+The dashboard reads the domain status and dispatches the domain attempt command.
+React does not recalculate readiness or mutate the completion flag directly.
 
 ### Manual evaluation questions
 

@@ -5,6 +5,10 @@ import {
   PLAYABLE_CORE_CONFIG,
   getPlayableCoreGuidance,
 } from "../game/playableCore";
+import {
+  FIRST_TRIAL_CONFIG,
+  getFirstTrialStatus,
+} from "../game/firstTrial";
 
 function formatCycleProgress(progress: number): string {
   return Number.isInteger(progress) ? String(progress) : progress.toFixed(1);
@@ -110,6 +114,7 @@ export default function Home() {
     practice,
     buyRefinedTechnique,
     buySteadyRoutine,
+    attemptFirstTrial,
     resetGame,
   } = useGame();
   const totalLevel = xpToLevel(state.wcXp) + xpToLevel(state.miningXp);
@@ -128,6 +133,13 @@ export default function Home() {
     techniqueOwned &&
     state.playableCore.mastery >= PLAYABLE_CORE_CONFIG.steadyRoutineCost;
   const guidance = getPlayableCoreGuidance(state);
+  const firstTrial = getFirstTrialStatus(state);
+  const firstTrialProgress = Math.min(
+    firstTrial.trainingXp,
+    firstTrial.requiredTrainingXp
+  );
+  const firstTrialProgressPercent =
+    (firstTrialProgress / firstTrial.requiredTrainingXp) * 100;
 
   return (
     <main className="flex flex-1 flex-col items-center bg-zinc-950 px-4 py-12 text-white">
@@ -268,6 +280,131 @@ export default function Home() {
               className="h-full bg-sky-400 transition-all duration-300"
               style={{ width: `${trainingLevelProgress}%` }}
             />
+          </div>
+
+          <div
+            className={`mb-4 border p-4 ${
+              firstTrial.stage === "completed"
+                ? "border-emerald-700 bg-emerald-950/30"
+                : firstTrial.stage === "ready"
+                  ? "border-amber-500 bg-amber-950/30"
+                  : "border-zinc-700 bg-zinc-950/70"
+            }`}
+            data-testid="first-trial"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="font-mono text-xs font-semibold uppercase tracking-widest text-white/40">
+                  Character growth objective
+                </p>
+                <h3 className="mt-1 text-lg font-bold">First Trial</h3>
+              </div>
+              <span
+                className={`border px-2 py-1 font-mono text-xs font-semibold ${
+                  firstTrial.stage === "completed"
+                    ? "border-emerald-600 bg-emerald-950 text-emerald-300"
+                    : firstTrial.stage === "ready"
+                      ? "border-amber-500 bg-amber-950 text-amber-200"
+                      : "border-zinc-600 bg-zinc-900 text-white/50"
+                }`}
+                data-testid="first-trial-status"
+              >
+                {firstTrial.stage === "completed"
+                  ? "Trial Completed"
+                  : firstTrial.stage === "ready"
+                    ? "Ready"
+                    : "Locked"}
+              </span>
+            </div>
+
+            {firstTrial.stage !== "completed" ? (
+              <>
+                <p className="mt-3 text-sm text-white/60">
+                  {firstTrial.stage === "ready" ? (
+                    <>
+                      Training Level {firstTrial.trainingLevel} meets the Level{" "}
+                      {firstTrial.requiredTrainingLevel} requirement. Your
+                      training can now be put to the test.
+                    </>
+                  ) : (
+                    <>
+                      Training Level {firstTrial.trainingLevel} of{" "}
+                      {firstTrial.requiredTrainingLevel}. Reach Level{" "}
+                      {firstTrial.requiredTrainingLevel} to prove what your
+                      training has enabled.
+                    </>
+                  )}
+                </p>
+                <div className="mt-3">
+                  <div className="mb-1 flex flex-wrap justify-between gap-2 font-mono text-xs text-white/50">
+                    <span>First Trial readiness</span>
+                    <span>
+                      {firstTrialProgress} / {firstTrial.requiredTrainingXp}{" "}
+                      Training XP
+                    </span>
+                  </div>
+                  <div
+                    className="h-2 w-full bg-white/10"
+                    role="progressbar"
+                    aria-label="First Trial readiness"
+                    aria-valuemin={0}
+                    aria-valuemax={firstTrial.requiredTrainingXp}
+                    aria-valuenow={firstTrialProgress}
+                  >
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        firstTrial.stage === "ready"
+                          ? "bg-amber-400"
+                          : "bg-violet-400"
+                      }`}
+                      style={{ width: `${firstTrialProgressPercent}%` }}
+                    />
+                  </div>
+                </div>
+                <p
+                  className="mt-3 text-sm text-white/60"
+                  id="first-trial-explanation"
+                >
+                  {firstTrial.stage === "ready"
+                    ? "Your training is sufficient. This deliberate attempt is guaranteed and costs nothing."
+                    : "Continue training to enable this guaranteed attempt. There are no hidden requirements or costs."}
+                </p>
+                <button
+                  type="button"
+                  onClick={attemptFirstTrial}
+                  disabled={firstTrial.stage !== "ready"}
+                  aria-describedby="first-trial-explanation"
+                  className={`mt-4 w-full border px-4 py-3 font-mono text-sm font-semibold transition ${
+                    firstTrial.stage === "ready"
+                      ? "border-amber-400 bg-amber-900/60 text-amber-100 hover:bg-amber-800/70 active:translate-y-px"
+                      : "cursor-not-allowed border-zinc-700 bg-zinc-900 text-white/30"
+                  }`}
+                >
+                  {firstTrial.stage === "ready"
+                    ? "Attempt First Trial"
+                    : `Reach Training Level ${firstTrial.requiredTrainingLevel}`}
+                </button>
+              </>
+            ) : (
+              <div className="mt-3">
+                <p className="text-sm text-emerald-100/80">
+                  Your training enabled this milestone. No Mastery or Training
+                  XP was spent.
+                </p>
+                <div className="mt-3 border-l-2 border-emerald-400 bg-emerald-950/50 px-3 py-2">
+                  <p className="font-mono text-xs uppercase tracking-wider text-emerald-300/70">
+                    Next objective
+                  </p>
+                  <p className="mt-1 font-semibold text-emerald-100">
+                    Reach Training Level{" "}
+                    {FIRST_TRIAL_CONFIG.followUpTrainingLevel}
+                  </p>
+                  <p className="mt-1 text-xs text-white/50">
+                    No further trial or reward is promised yet.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mb-4 border border-zinc-700 bg-zinc-950/70 p-4">
