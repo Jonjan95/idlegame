@@ -112,6 +112,12 @@ problem was identified that should expand the First Trial itself. This is
 enough evidence to close the bounded experiment, while remaining less than a
 claim that its mechanics or presentation are final.
 
+On 2026-07-18, the owner manually tested the persistent character profile and
+confirmed that it all worked as intended. This accepts naming, persistence, the
+compact Character view, and the visible First Trial growth marker as a stable
+foundation. It does not by itself establish which deeper character mechanics
+would be enjoyable or whether the provisional presentation should be final.
+
 ## Next design hypothesis: character growth and one trial
 
 ### Intended player feeling
@@ -270,6 +276,42 @@ these questions.
 This contract does not include combat, enemies, health, damage, random failure,
 loot, equipment, attributes, locations, a world map, story, repeatable rewards,
 a second trial, another currency, or a final theme.
+
+## Accepted design hypothesis: persistent character identity
+
+This bounded experiment asked whether naming one persistent character and
+seeing existing growth attached to that identity makes progression feel more
+personal. It does not yet ask the player to choose a class, build, origin,
+attribute, appearance, or combat role.
+
+The smallest character foundation contains:
+
+- One player-chosen display name, with `Trainee` as neutral default wording.
+- One compact Character view using temporary presentation rather than final art.
+- Existing Training Level and lifetime Training XP.
+- A presentation-only state of `Training in progress` or `Trial proven`, derived
+  from the existing First Trial milestone.
+- The existing next objective, without another reward or progression rule.
+
+The name changes identity only. The visible growth state is derived rather than
+stored and has no effect on Practice, rewards, costs, automation, gathering, or
+trial rules. Stable character data must not depend on the eventual theme.
+
+### Character identity evaluation
+
+The foundation passed functional manual evaluation. These questions remain
+useful when choosing or evaluating a deeper character step:
+
+1. Does choosing a name create a stronger attachment to the same progression?
+2. Is Training Level easier to understand as character growth in this view?
+3. Does the visible change after the First Trial feel like the character earned
+   a persistent milestone?
+4. Does the temporary presentation leave room for a future theme and art style?
+5. What feels missing from the personal connection, without assuming that the
+   answer must be classes, equipment, combat, or a large customization system?
+
+Automated tests verify identity, derivation, migration, and persistence. They
+cannot establish that the character feels personal or rewarding.
 
 ## Playable-core contract
 

@@ -1,7 +1,12 @@
 import { DEFAULT_TOOLS, type Tools } from "../lib/resources";
+import {
+  createDefaultCharacterProfile,
+  normalizeCharacterName,
+  type CharacterProfileState,
+} from "./characterProfile";
 import { PLAYABLE_CORE_CONFIG } from "./playableCoreConfig";
 
-export const CURRENT_SAVE_VERSION = 2 as const;
+export const CURRENT_SAVE_VERSION = 3 as const;
 
 export type SkillName = "woodcutting" | "mining";
 
@@ -22,6 +27,7 @@ export interface PlayableCoreState {
  * are spendable balances.
  */
 export interface GameState {
+  character: CharacterProfileState;
   wcXp: number;
   wcLogs: number;
   miningXp: number;
@@ -63,6 +69,7 @@ export interface StateValidationIssue {
 
 export function createDefaultGameState(): GameState {
   return {
+    character: createDefaultCharacterProfile(),
     wcXp: 0,
     wcLogs: 0,
     miningXp: 0,
@@ -161,6 +168,22 @@ export function validateGameState(state: GameState): StateValidationIssue[] {
       "state.playableCore.cycleProgress"
     ),
   ];
+
+  const characterName = normalizeCharacterName(state.character?.name);
+  if (!characterName.accepted) {
+    issues.push({
+      path: "state.character.name",
+      message:
+        characterName.issue === "too_long"
+          ? "must contain at most 24 characters"
+          : "must not be empty",
+    });
+  } else if (characterName.name !== state.character.name) {
+    issues.push({
+      path: "state.character.name",
+      message: "must be normalized",
+    });
+  }
 
   if (
     state.playableCore.cycleProgress >=

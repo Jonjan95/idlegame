@@ -297,6 +297,30 @@ test("unlocks Steady Routine and keeps manual Practice", async ({ page }) => {
 test("completes the critical playable-core journey from a fresh save", async ({
   page,
 }) => {
+  await page.getByRole("link", { name: "Character" }).click();
+  const characterCard = page.getByTestId("character-card");
+  const characterName = page.getByLabel("Character name");
+  await expect(characterCard.getByTestId("character-name")).toHaveText(
+    "Trainee"
+  );
+  await expect(characterCard.getByTestId("character-stage")).toHaveText(
+    "Training in progress"
+  );
+  await characterName.fill("  Mira   Stone  ");
+  await page.getByRole("button", { name: "Save name" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "Character name saved as Mira Stone."
+  );
+  await expect(characterCard.getByTestId("character-name")).toHaveText(
+    "Mira Stone"
+  );
+
+  await page.reload();
+  await expect(characterCard.getByTestId("character-name")).toHaveText(
+    "Mira Stone"
+  );
+  await page.getByRole("link", { name: "Home" }).click();
+
   const core = page.getByTestId("playable-core");
   const cycleProgress = core.getByRole("progressbar", {
     name: "Practice cycle progress",
@@ -461,6 +485,20 @@ test("completes the critical playable-core journey from a fresh save", async ({
   expect(
     Number(await core.getByTestId("core-completed-cycles").innerText())
   ).toBeGreaterThanOrEqual(11);
+
+  await page.getByRole("link", { name: "Character" }).click();
+  await expect(characterCard.getByTestId("character-name")).toHaveText(
+    "Mira Stone"
+  );
+  await expect(characterCard.getByTestId("character-stage")).toHaveText(
+    "Trial proven"
+  );
+  await expect(characterCard.getByTestId("character-milestone")).toContainText(
+    "First Trial completed"
+  );
+  await expect(characterCard.getByTestId("character-milestone")).toContainText(
+    "Reach Training Level 4"
+  );
 });
 
 test("exposes keyboard activity controls and labelled progress", async ({
@@ -506,6 +544,14 @@ test("keeps the dashboard within a 320px viewport", async ({ page }) => {
 
   await expect(page.getByTestId("playable-core")).toBeVisible();
   await expect(page.getByTestId("first-trial")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth
+    )
+  ).toBe(true);
+
+  await page.getByRole("link", { name: "Character" }).click();
+  await expect(page.getByTestId("character-card")).toBeVisible();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth
@@ -666,6 +712,7 @@ test("wipes a progressed save while game loops are active", async ({ page }) => 
     save: {
       version: CURRENT_SAVE_VERSION,
       state: {
+        character: { name: "Trainee" },
         wcXp: 0,
         wcLogs: 0,
         miningXp: 0,

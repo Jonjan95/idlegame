@@ -13,6 +13,7 @@ describe("canonical game state", () => {
     const second = createDefaultGameState();
 
     first.inventory.tree = 5;
+    first.character.name = "Mira";
     first.tools.bronzeAxe = true;
     first.playableCore.mastery = 3;
     first.playableCore.refinedTechniqueOwned = true;
@@ -20,12 +21,14 @@ describe("canonical game state", () => {
     first.playableCore.firstTrialCompleted = true;
 
     expect(second.inventory).toEqual({});
+    expect(second.character.name).toBe("Trainee");
     expect(second.tools.bronzeAxe).toBe(false);
     expect(second.playableCore.mastery).toBe(0);
     expect(second.playableCore.refinedTechniqueOwned).toBe(false);
     expect(second.playableCore.steadyRoutineOwned).toBe(false);
     expect(second.playableCore.firstTrialCompleted).toBe(false);
     expect(first.inventory).not.toBe(second.inventory);
+    expect(first.character).not.toBe(second.character);
     expect(first.tools).not.toBe(second.tools);
     expect(first.playableCore).not.toBe(second.playableCore);
   });
@@ -81,6 +84,7 @@ describe("canonical game state", () => {
     Object.assign(state.playableCore, { refinedTechniqueOwned: "yes" });
     Object.assign(state.playableCore, { steadyRoutineOwned: "yes" });
     Object.assign(state.playableCore, { firstTrialCompleted: "yes" });
+    state.character.name = " ";
 
     expect(validateGameState(state)).toEqual(
       expect.arrayContaining([
@@ -109,6 +113,10 @@ describe("canonical game state", () => {
         {
           path: "state.playableCore.firstTrialCompleted",
           message: "must be a boolean",
+        },
+        {
+          path: "state.character.name",
+          message: "must not be empty",
         },
       ])
     );
