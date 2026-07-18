@@ -304,10 +304,23 @@ test("completes the critical playable-core journey from a fresh save", async ({
   const basePractice = core.getByRole("button", {
     name: "Practice +25 progress",
   });
+  const firstTrial = core.getByTestId("first-trial");
+  const firstTrialReadiness = firstTrial.getByRole("progressbar", {
+    name: "First Trial readiness",
+  });
 
   await expect(core.getByTestId("core-guidance")).toContainText(
     "Refined Technique · 3 Mastery remaining"
   );
+  await expect(firstTrial.getByTestId("first-trial-status")).toHaveText(
+    "Locked"
+  );
+  await expect(firstTrial).toContainText("Training Level 1 of 3");
+  await expect(firstTrial).toContainText("0 / 400 Training XP");
+  await expect(firstTrialReadiness).toHaveAttribute("aria-valuenow", "0");
+  await expect(
+    firstTrial.getByRole("button", { name: "Reach Training Level 3" })
+  ).toBeDisabled();
 
   for (let action = 0; action < 4; action += 1) {
     await basePractice.click();
@@ -372,6 +385,58 @@ test("completes the critical playable-core journey from a fresh save", async ({
       progressBeforeManual
   ).toBeGreaterThanOrEqual(40);
 
+  await expect(firstTrial.getByTestId("first-trial-status")).toHaveText(
+    "Locked"
+  );
+  for (let action = 0; action < 20; action += 1) {
+    const trainingXp = Number(
+      await core.getByTestId("core-training-xp").innerText()
+    );
+    if (trainingXp >= 400) break;
+    await upgradedPractice.click();
+  }
+
+  expect(
+    Number(await core.getByTestId("core-training-xp").innerText())
+  ).toBeGreaterThanOrEqual(400);
+  await expect(firstTrial.getByTestId("first-trial-status")).toHaveText(
+    "Ready"
+  );
+  await expect(firstTrialReadiness).toHaveAttribute("aria-valuenow", "400");
+  const attempt = firstTrial.getByRole("button", {
+    name: "Attempt First Trial",
+  });
+  await expect(attempt).toBeEnabled();
+
+  const masteryBeforeTrial = Number(
+    await core.getByTestId("core-mastery").innerText()
+  );
+  const trainingXpBeforeTrial = Number(
+    await core.getByTestId("core-training-xp").innerText()
+  );
+  await attempt.click();
+
+  await expect(firstTrial.getByTestId("first-trial-status")).toHaveText(
+    "Trial Completed"
+  );
+  await expect(firstTrial).toContainText("Reach Training Level 4");
+  await expect(firstTrial).toContainText(
+    "No further trial or reward is promised yet."
+  );
+  await expect(
+    firstTrial.getByRole("button", { name: "Attempt First Trial" })
+  ).toHaveCount(0);
+  await expect(page.getByRole("status")).toContainText(
+    "First Trial completed · Your training enabled this milestone"
+  );
+  expect(
+    Number(await core.getByTestId("core-mastery").innerText())
+  ).toBeGreaterThanOrEqual(masteryBeforeTrial);
+  expect(
+    Number(await core.getByTestId("core-training-xp").innerText())
+  ).toBeGreaterThanOrEqual(trainingXpBeforeTrial);
+  await expect(upgradedPractice).toBeVisible();
+
   await page.reload();
 
   await expect(core.getByTestId("refined-technique-owned")).toHaveText(
@@ -386,6 +451,10 @@ test("completes the critical playable-core journey from a fresh save", async ({
   await expect(
     core.getByRole("button", { name: "Practice +40 progress" })
   ).toBeVisible();
+  await expect(firstTrial.getByTestId("first-trial-status")).toHaveText(
+    "Trial Completed"
+  );
+  await expect(firstTrial).toContainText("Reach Training Level 4");
   expect(
     Number(await core.getByTestId("core-training-xp").innerText())
   ).toBeGreaterThanOrEqual(275);
@@ -436,6 +505,7 @@ test("keeps the dashboard within a 320px viewport", async ({ page }) => {
   await page.reload();
 
   await expect(page.getByTestId("playable-core")).toBeVisible();
+  await expect(page.getByTestId("first-trial")).toBeVisible();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth

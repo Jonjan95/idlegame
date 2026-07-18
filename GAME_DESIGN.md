@@ -98,6 +98,20 @@ The owner subsequently approved character progression and training as important
 to the next direction, with a small meaningful objective that demonstrates what
 the character's growth enabled.
 
+On 2026-07-18, the owner found that the First Trial behavior worked well, but
+the experiment page required too much scrolling because the primary Practice
+action sat below the status, objective, and upgrade panels. During this
+experiment phase, the primary action should stay beside the progress it affects
+and related controls may use compact responsive grouping. This is temporary
+testing scaffolding, not a commitment to the final game interface.
+
+After the Practice action was moved beside its progress, the owner confirmed
+that the layout was better and chose to continue toward a more personal
+character experience. No specific pacing, balance, clarity, choice, or reward
+problem was identified that should expand the First Trial itself. This is
+enough evidence to close the bounded experiment, while remaining less than a
+claim that its mechanics or presentation are final.
+
 ## Next design hypothesis: character growth and one trial
 
 ### Intended player feeling
@@ -140,11 +154,15 @@ for review before source code changes.
 
 ## Accepted first-trial contract
 
-This contract has been accepted as the next small experiment. Its deterministic
-status, attempt, and persistence rules are implemented, but it is not yet
-presented in the UI and therefore is not yet a playable mechanic. Its purpose
-is to test whether the existing training loop feels more meaningful when
-lifetime character growth enables one deliberate objective.
+This contract was accepted and implemented as a small experiment. Its
+deterministic rules and compact dashboard presentation were manually evaluated
+and found sufficient to continue toward a more personal character experience.
+Its purpose was to test whether the existing training loop feels more
+meaningful when lifetime character growth enables one deliberate objective.
+
+That result supports continuing; it does not establish a final interface,
+theme, balance, or complete progression model. The evaluation questions below
+remain useful whenever the experiment is changed.
 
 ### Stable concepts and provisional wording
 
@@ -223,8 +241,8 @@ version 1 to version 2, following the architecture rule that format changes are
 versioned. Version 1 saves migrate field by field without losing existing
 progression, selections, inventory, tools, or active gathering state.
 
-The flag has no player-facing effect until a separate presentation issue wires
-the domain status and attempt command into React.
+The dashboard reads the domain status and dispatches the domain attempt command.
+React does not recalculate readiness or mutate the completion flag directly.
 
 ### Manual evaluation questions
 

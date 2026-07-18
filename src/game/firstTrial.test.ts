@@ -18,6 +18,7 @@ describe("First Trial status", () => {
     expect(FIRST_TRIAL_CONFIG).toEqual({
       requiredTrainingLevel: 3,
       requiredTrainingXp: 400,
+      followUpTrainingLevel: 4,
     });
   });
 

@@ -132,13 +132,18 @@ Train
 
 The design contract is accepted. Training Level is the sole readiness
 capability, Level 3 is the provisional threshold, and the one-time outcome is
-deterministic. The first implementation step adds the pure locked, ready, and
-completed rules plus a versioned persistent completion milestone. It adds no
-player-facing mechanic by itself.
+deterministic. The domain rules, versioned completion milestone, dashboard
+presentation, success feedback, and one Level 4 follow-up objective are
+implemented.
 
-The next controlled step should present that existing domain status and attempt
-command in the dashboard, then perform the contract's manual evaluation. It
-must not add another reward system, trial, or speculative backlog.
+The owner manually evaluated the First Trial, found it worked well enough to
+continue, and confirmed that the compacted experiment layout was better. No
+specific pacing, balance, clarity, choice, or reward change was requested.
+
+The next controlled step may establish a small persistent character identity
+and show existing progression through it. This does not approve classes,
+attributes, equipment, combat, character power choices, final artwork, or a
+larger character-system backlog.
 
 Combat, loot, equipment, multiple attributes, additional currencies, a world
 map, story, and the final theme remain undecided and unplanned.
